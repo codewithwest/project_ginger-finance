@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { graphqlFetch } from '@/lib/graphql';
-import { Landmark, TrendingUp, Plus } from 'lucide-react';
+import { Landmark, TrendingUp, Plus, Briefcase, Activity } from 'lucide-react';
 import AddAssetModal from '@/components/dashboard/AddAssetModal';
 
 interface Asset {
@@ -40,10 +40,10 @@ export default function AssetsView() {
       if (result.data) {
         setAssets(result.data.myAssets);
       }
-      setLoading(false); // Set loading to false on success
     } catch (err) {
       console.error('Failed to fetch assets:', err);
-      setLoading(false); // Set loading to false on error
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -54,10 +54,22 @@ export default function AssetsView() {
   const totalValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0);
   const totalGrowth = assets.reduce((sum, asset) => sum + (asset.currentValue - asset.purchasePrice), 0);
 
+  if (loading) return (
+    <div className="loader-container">
+      <div className="loader-3d"></div>
+    </div>
+  );
+
   return (
     <div className="view-container">
       <header className="view-header">
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Farm Assets</h2>
+        <div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Landmark className="gradient-text" size={32} />
+            Farm Assets
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>Inventory and valuation of your agricultural holdings.</p>
+        </div>
         <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
           Add New Asset
@@ -70,61 +82,66 @@ export default function AssetsView() {
         onSuccess={fetchAssets}
       />
 
-      <div className="summary-grid">
-        <div className="glass-card summary-card">
-          <span className="summary-label">Total Asset Value</span>
-          <span className="summary-value">R {totalValue.toLocaleString()}</span>
+      <div className="stats-grid">
+        <div className="glass-card stat-card">
+          <div className="stat-icon" style={{ background: 'rgba(79, 163, 224, 0.15)' }}>
+            <Briefcase size={24} color="#4fa3e0" />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">Total Portfolio Value</span>
+            <span className="stat-value">R {totalValue.toLocaleString()}</span>
+          </div>
         </div>
-        <div className="glass-card summary-card">
-          <span className="summary-label">Overall Growth</span>
-          <span className="summary-value" style={{ color: totalGrowth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>
-            {totalGrowth >= 0 ? '+' : ''} R {totalGrowth.toLocaleString()}
-          </span>
+        <div className="glass-card stat-card">
+          <div className="stat-icon" style={{ background: totalGrowth >= 0 ? 'rgba(72, 187, 120, 0.15)' : 'rgba(252, 129, 129, 0.15)' }}>
+            <Activity size={24} color={totalGrowth >= 0 ? '#48bb78' : '#fc8181'} />
+          </div>
+          <div className="stat-info">
+            <span className="stat-label">Net Unrealized Growth</span>
+            <span className="stat-value" style={{ color: totalGrowth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>
+              {totalGrowth >= 0 ? '+' : ''} R {totalGrowth.toLocaleString()}
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="assets-grid">
-        {loading ? (
-          <div className="loading-state">Loading assets...</div>
-        ) : (
-          assets.map((asset) => (
-            <div key={asset._id} className="glass-card asset-item">
-              <div className="asset-header">
-                <div className="asset-icon">
-                  <Landmark size={24} color="var(--color-accent-primary)" />
-                </div>
-                <div className="asset-title">
-                  <h4 style={{ fontWeight: 700, fontSize: '1.1rem' }}>{asset.name}</h4>
-                  <span className="asset-category">{asset.category}</span>
-                </div>
-              </div>
-              
-              <div className="asset-details">
-                <div className="detail-row">
-                  <span className="detail-label">Current Value</span>
-                  <span className="detail-value highlight">R {asset.currentValue.toLocaleString()}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Purchase Price</span>
-                  <span className="detail-value">R {asset.purchasePrice.toLocaleString()}</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Purchased On</span>
-                  <span className="detail-value">{new Date(asset.purchaseDate).toLocaleDateString()}</span>
-                </div>
-              </div>
-
-              <div className="asset-footer">
-                <div className="growth-indicator">
-                  <TrendingUp size={16} color={asset.currentValue >= asset.purchasePrice ? 'var(--color-income)' : 'var(--color-expense)'} />
-                  <span style={{ color: asset.currentValue >= asset.purchasePrice ? 'var(--color-income)' : 'var(--color-expense)', fontWeight: 600 }}>
-                    {((asset.currentValue - asset.purchasePrice) / asset.purchasePrice * 100).toFixed(1)}%
-                  </span>
-                </div>
-                <button className="btn-ghost-sm">Manage</button>
+        {assets.map((asset) => (
+          <div key={asset._id} className="glass-card asset-card-premium">
+            <div className="card-top">
+              <div className="category-pill">{asset.category}</div>
+              <div className="growth-badge" style={{ color: asset.currentValue >= asset.purchasePrice ? 'var(--color-income)' : 'var(--color-expense)' }}>
+                <TrendingUp size={14} />
+                {((asset.currentValue - asset.purchasePrice) / (asset.purchasePrice || 1) * 100).toFixed(1)}%
               </div>
             </div>
-          ))
+            
+            <h3 className="asset-name-label">{asset.name}</h3>
+            
+            <div className="value-display">
+              <span className="value-label">Current Value</span>
+              <span className="value-amount">R {asset.currentValue.toLocaleString()}</span>
+            </div>
+
+            <div className="meta-footer">
+              <div className="meta-item">
+                <span className="meta-label">Basis</span>
+                <span className="meta-val">R {asset.purchasePrice.toLocaleString()}</span>
+              </div>
+              <div className="meta-item">
+                <span className="meta-label">Acquired</span>
+                <span className="meta-val">{new Date(asset.purchaseDate).toLocaleDateString()}</span>
+              </div>
+            </div>
+
+            <button className="btn-ghost-sm" style={{ width: '100%', marginTop: 'auto' }}>View Ledger</button>
+          </div>
+        ))}
+        {assets.length === 0 && (
+          <div className="empty-state">
+            < Landmark size={48} color="var(--color-text-muted)" style={{ opacity: 0.3 }} />
+            <p>No agricultural assets recorded in this household.</p>
+          </div>
         )}
       </div>
 
@@ -132,111 +149,114 @@ export default function AssetsView() {
         .view-container {
           display: flex;
           flex-direction: column;
-          gap: 1.5rem;
-          padding: 1rem;
+          gap: 2rem;
         }
-        .view-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .summary-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1.5rem;
-        }
-        .summary-card {
-          padding: 1.25rem 1.5rem;
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-        .summary-label {
-          font-size: 0.875rem;
-          color: var(--color-text-muted);
-          font-weight: 500;
-        }
-        .summary-value {
-          font-size: 1.5rem;
-          font-weight: 700;
-        }
+
         .assets-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
           gap: 1.5rem;
         }
-        .asset-item {
+
+        .asset-card-premium {
           padding: 1.5rem;
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
-          transition: transform 0.2s;
+          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+          height: 100%;
+          position: relative;
+          overflow: hidden;
         }
-        .asset-item:hover {
-          transform: translateY(-4px);
+
+        .asset-card-premium:hover {
+          transform: translateY(-8px) scale(1.02);
           border-color: var(--color-accent-primary);
         }
-        .asset-header {
+
+        .card-top {
           display: flex;
-          gap: 1rem;
+          justify-content: space-between;
           align-items: center;
         }
-        .asset-icon {
-          width: 48px;
-          height: 48px;
-          background: rgba(79, 163, 224, 0.1);
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .asset-category {
-          font-size: 0.8rem;
-          color: var(--color-text-muted);
+
+        .category-pill {
+          font-size: 0.65rem;
+          font-weight: 800;
           text-transform: uppercase;
+          background: rgba(255,255,255,0.05);
+          padding: 0.25rem 0.6rem;
+          border-radius: 6px;
+          color: var(--color-text-secondary);
           letter-spacing: 0.05em;
+        }
+
+        .growth-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.75rem;
           font-weight: 700;
         }
-        .asset-details {
+
+        .asset-name-label {
+          font-size: 1.25rem;
+          font-weight: 700;
+          color: white;
+        }
+
+        .value-display {
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
-          padding: 1rem 0;
-          border-top: 1px solid var(--color-border);
-          border-bottom: 1px solid var(--color-border);
+          gap: 0.2rem;
         }
-        .detail-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .detail-label {
-          font-size: 0.875rem;
+
+        .value-label {
+          font-size: 0.75rem;
           color: var(--color-text-muted);
-        }
-        .detail-value {
-          font-size: 0.95rem;
+          text-transform: uppercase;
           font-weight: 600;
         }
-        .detail-value.highlight {
+
+        .value-amount {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: var(--color-accent-primary);
+        }
+
+        .meta-footer {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .meta-item {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .meta-label {
+          font-size: 0.65rem;
+          color: var(--color-text-muted);
+          font-weight: 500;
+        }
+
+        .meta-val {
+          font-size: 0.8rem;
+          font-weight: 600;
           color: white;
-          font-size: 1.1rem;
-          font-weight: 700;
         }
-        .asset-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .growth-indicator {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-        .loading-state {
+
+        .empty-state {
           grid-column: 1 / -1;
-          padding: 4rem;
+          padding: 5rem 2rem;
           text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
           color: var(--color-text-muted);
         }
       `}</style>

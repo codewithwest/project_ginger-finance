@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { graphqlFetch } from '@/lib/graphql';
-import { PiggyBank, ArrowUpRight, History, Landmark } from 'lucide-react';
+import { PiggyBank, History, Landmark, Plus, TrendingUp } from 'lucide-react';
 import AddSavingsAccountModal from '@/components/dashboard/AddSavingsAccountModal';
 import AddTransactionModal from '@/components/dashboard/AddTransactionModal';
 
@@ -58,7 +58,7 @@ export default function SavingsView() {
       });
       if (result.data) {
         setAccounts(result.data.mySavingsAccounts);
-        setHistory(result.data.myTransactions);
+        setHistory(result.data.myTransactions || []);
       }
     } catch (err) {
       console.error('Failed to fetch savings data:', err);
@@ -72,6 +72,8 @@ export default function SavingsView() {
   }, [fetchData]);
 
   const totalSavings = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+  const savingsGoal = 500000;
+  const progressPercent = Math.min(100, (totalSavings / savingsGoal) * 100);
 
   if (loading) return (
     <div className="loader-container">
@@ -82,10 +84,18 @@ export default function SavingsView() {
   return (
     <div className="view-container">
       <header className="view-header">
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700 }}>Savings & Investments</h2>
+        <div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <PiggyBank className="gradient-text" size={32} />
+            Savings & Investments
+          </h2>
+          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>Growth and accumulation of your financial reserves.</p>
+        </div>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button className="btn-ghost" onClick={() => setIsAccountModalOpen(true)}>New Account</button>
-          <button className="btn-primary" onClick={() => setIsContributionModalOpen(true)}>New Contribution</button>
+          <button className="btn-primary" onClick={() => setIsContributionModalOpen(true)}>
+            <Plus size={18} /> New Contribution
+          </button>
         </div>
       </header>
 
@@ -95,7 +105,6 @@ export default function SavingsView() {
         onSuccess={fetchData}
       />
 
-      {/* Pre-configured modal for savings contributions */}
       <AddTransactionModal 
         isOpen={isContributionModalOpen}
         onClose={() => setIsContributionModalOpen(false)}
@@ -103,71 +112,85 @@ export default function SavingsView() {
         defaultType="savings"
       />
 
-      <div className="summary-banner glass-card">
-        <div className="banner-icon">
-          <PiggyBank size={32} color="white" />
-        </div>
-        <div className="banner-info">
-          <span className="banner-label">Total Combined Savings</span>
-          <span className="banner-value">R {totalSavings.toLocaleString()}</span>
-        </div>
-        <div className="banner-viz">
-           {/* Simple progress bar mock */}
-           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '200px' }}>
-              <div style={{ display: 'flex', justifySelf: 'space-between', fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
-                <span>Goal: R 500k</span>
-                <span style={{ marginLeft: 'auto' }}>{(totalSavings/500000*100).toFixed(0)}%</span>
+      <div className="premium-banner-wrapper">
+        <div className="glass-card premium-savings-banner">
+          <div className="banner-visual">
+            <div className="visual-circle">
+              <PiggyBank size={32} color="var(--color-accent-primary)" />
+            </div>
+            <div className="banner-data">
+              <span className="banner-label">Consolidated Balance</span>
+              <span className="banner-value">R {totalSavings.toLocaleString()}</span>
+            </div>
+          </div>
+          
+          <div className="banner-progress-section">
+            <div className="progress-header">
+              <span className="goal-label">Retirement Goal: R {savingsGoal.toLocaleString()}</span>
+              <span className="goal-percent">{progressPercent.toFixed(0)}%</span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }}>
+                <div className="progress-glow"></div>
               </div>
-              <div className="progress-bg">
-                <div className="progress-fill" style={{ width: `${Math.min(100, (totalSavings/500000*100))}%` }}></div>
-              </div>
-           </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="savings-main-grid">
         <div className="accounts-column">
           <div className="section-header">
-            <Landmark size={20} />
-            <h3 style={{ fontWeight: 700 }}>Your Accounts</h3>
+            <Landmark size={20} className="gradient-text" />
+            <h3 style={{ fontWeight: 700 }}>Management</h3>
           </div>
           <div className="accounts-list">
             {accounts.map(account => (
-              <div key={account._id} className="glass-card account-card">
-                <div className="account-info">
-                  <span className="account-tag">{account.accountType}</span>
-                  <h4 style={{ fontWeight: 700 }}>{account.accountName}</h4>
+              <div key={account._id} className="glass-card account-card-premium">
+                <div className="account-top">
+                  <span className="account-type-tag">{account.accountType}</span>
+                  <div className="account-icon-mini">
+                    <Landmark size={16} color="var(--color-accent-primary)" />
+                  </div>
                 </div>
-                <div className="account-balance">
-                  <span className="balance-label">Balance</span>
-                  <span className="balance-value">R {account.balance.toLocaleString()} {account.currency}</span>
+                <h4 className="account-title-label">{account.accountName}</h4>
+                <div className="account-balance-display">
+                  <span className="bal-label">Current Balance</span>
+                  <span className="bal-value">R {account.balance.toLocaleString()} {account.currency}</span>
                 </div>
+                <button className="btn-ghost-sm" style={{ width: '100%', marginTop: 'auto' }}>Details</button>
               </div>
             ))}
+            {accounts.length === 0 && (
+              <div className="empty-mini">No active accounts.</div>
+            )}
           </div>
         </div>
 
         <div className="history-column">
           <div className="section-header">
-            <History size={20} />
-            <h3 style={{ fontWeight: 700 }}>Contribution History</h3>
+            <History size={20} className="gradient-text" />
+            <h3 style={{ fontWeight: 700 }}>Recent Activity</h3>
           </div>
-          <div className="glass-card history-container">
+          <div className="glass-card activity-container-premium">
             {history.length === 0 ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-                No savings history yet.
+              <div className="empty-state-mini">
+                <History size={32} style={{ opacity: 0.2, marginBottom: '1rem' }} />
+                <p>No contribution history found.</p>
               </div>
             ) : (
               history.map(item => (
-                <div key={item._id} className="history-item">
-                  <div className="history-icon">
-                    <ArrowUpRight size={18} />
+                <div key={item._id} className="activity-item-premium">
+                  <div className="activity-icon-box">
+                    <TrendingUp size={16} />
                   </div>
-                  <div className="history-details">
-                    <span className="history-desc">{item.description}</span>
-                    <span className="history-date">{new Date(item.date).toLocaleDateString()}</span>
+                  <div className="activity-info">
+                    <span className="activity-desc">{item.description}</span>
+                    <span className="activity-date">{new Date(item.date).toLocaleDateString()}</span>
                   </div>
-                  <span className="history-amount">+ R {item.amount.toLocaleString()}</span>
+                  <div className="activity-amount-box">
+                    <span className="activity-amount">+ R {item.amount.toLocaleString()}</span>
+                  </div>
                 </div>
               ))
             )}
@@ -180,140 +203,264 @@ export default function SavingsView() {
           display: flex;
           flex-direction: column;
           gap: 2rem;
-          padding: 1rem;
         }
-        .view-header {
+
+        .premium-banner-wrapper {
+          position: relative;
+        }
+
+        .premium-savings-banner {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          padding: 2.5rem;
+          background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+          border: 1px solid rgba(255,255,255,0.1);
+          gap: 3rem;
         }
-        .summary-banner {
-          background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
-          padding: 2rem;
+
+        @media (max-width: 900px) {
+          .premium-savings-banner {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2rem;
+          }
+        }
+
+        .banner-visual {
           display: flex;
           align-items: center;
-          gap: 2.5rem;
-          color: white;
-          border: none;
+          gap: 1.5rem;
         }
-        .banner-icon {
+
+        .visual-circle {
           width: 64px;
           height: 64px;
-          background: rgba(255, 255, 255, 0.2);
+          background: rgba(79, 163, 224, 0.1);
           border-radius: 20px;
           display: flex;
           align-items: center;
           justify-content: center;
+          border: 1px solid rgba(79, 163, 224, 0.2);
         }
-        .banner-info {
+
+        .banner-data {
           display: flex;
           flex-direction: column;
-          gap: 0.25rem;
-          flex: 1;
         }
+
         .banner-label {
-          font-size: 1rem;
-          opacity: 0.8;
-          font-weight: 500;
+          font-size: 0.875rem;
+          color: var(--color-text-muted);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
+
         .banner-value {
           font-size: 2.5rem;
           font-weight: 800;
+          color: white;
         }
-        .progress-bg {
-          height: 8px;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 4px;
+
+        .banner-progress-section {
+          flex: 1;
+          max-width: 400px;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        @media (max-width: 900px) {
+          .banner-progress-section {
+            max-width: 100%;
+            width: 100%;
+          }
+        }
+
+        .progress-header {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.875rem;
+          font-weight: 600;
+        }
+
+        .goal-label { color: var(--color-text-muted); }
+        .goal-percent { color: var(--color-accent-primary); }
+
+        .progress-track {
+          height: 10px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 5px;
           overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.05);
         }
-        .progress-fill {
+
+        .progress-bar-fill {
           height: 100%;
-          background: white;
-          border-radius: 4px;
+          background: linear-gradient(90deg, var(--color-accent-primary), var(--color-accent-secondary));
+          border-radius: 5px;
+          position: relative;
+          transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
+
+        .progress-glow {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          animation: barShine 3s infinite;
+        }
+
+        @keyframes barShine {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+
         .savings-main-grid {
           display: grid;
           grid-template-columns: 1fr 1.5fr;
           gap: 2.5rem;
         }
+
         @media (max-width: 1024px) {
           .savings-main-grid { grid-template-columns: 1fr; }
         }
+
         .section-header {
           display: flex;
           align-items: center;
           gap: 0.75rem;
           margin-bottom: 1.5rem;
-          color: var(--color-text-primary);
         }
+
         .accounts-list {
-          display: flex;
-          flex-direction: column;
+          display: grid;
+          grid-template-columns: 1fr;
           gap: 1.25rem;
         }
-        .account-card {
+
+        .account-card-premium {
           padding: 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          transition: all 0.2s;
+        }
+
+        .account-card-premium:hover {
+          border-color: var(--color-accent-primary);
+          transform: translateX(5px);
+        }
+
+        .account-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          transition: transform 0.2s;
         }
-        .account-card:hover { transform: translateX(5px); border-color: var(--color-accent-primary); }
-        .account-tag {
-          font-size: 0.7rem;
+
+        .account-type-tag {
+          font-size: 0.65rem;
           font-weight: 800;
           text-transform: uppercase;
           color: var(--color-accent-primary);
           background: rgba(79, 163, 224, 0.1);
-          padding: 0.15rem 0.5rem;
+          padding: 0.2rem 0.5rem;
           border-radius: 4px;
-          margin-bottom: 0.5rem;
-          display: inline-block;
         }
-        .account-balance {
-          text-align: right;
-        }
-        .balance-label {
-          display: block;
-          font-size: 0.8rem;
-          color: var(--color-text-muted);
-          margin-bottom: 0.25rem;
-        }
-        .balance-value {
-          font-weight: 700;
+
+        .account-title-label {
           font-size: 1.1rem;
+          font-weight: 700;
+          color: white;
         }
-        .history-container {
-          padding: 1rem;
-          max-height: 400px;
-          overflow-y: auto;
+
+        .account-balance-display {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
         }
-        .history-item {
+
+        .bal-label {
+          font-size: 0.75rem;
+          color: var(--color-text-muted);
+          font-weight: 600;
+        }
+
+        .bal-value {
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: white;
+        }
+
+        .activity-container-premium {
+          padding: 0.5rem;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .activity-item-premium {
           display: flex;
           align-items: center;
           gap: 1rem;
-          padding: 0.75rem;
-          border-bottom: 1px solid var(--color-border);
+          padding: 1.25rem;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          transition: background 0.2s;
         }
-        .history-item:last-child { border-bottom: none; }
-        .history-icon {
-          width: 36px;
-          height: 36px;
-          background: rgba(104, 211, 145, 0.15);
+
+        .activity-item-premium:last-child { border-bottom: none; }
+
+        .activity-item-premium:hover {
+          background: rgba(255,255,255,0.02);
+        }
+
+        .activity-icon-box {
+          width: 40px;
+          height: 40px;
+          background: rgba(104, 211, 145, 0.1);
           color: var(--color-income);
-          border-radius: 10px;
+          border-radius: 12px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
-        .history-details {
+
+        .activity-info {
           display: flex;
           flex-direction: column;
           flex: 1;
         }
-        .history-desc { font-weight: 600; font-size: 0.95rem; }
-        .history-date { font-size: 0.8rem; color: var(--color-text-muted); }
-        .history-amount { font-weight: 700; color: var(--color-income); }
+
+        .activity-desc {
+          font-weight: 700;
+          color: white;
+        }
+
+        .activity-date {
+          font-size: 0.8rem;
+          color: var(--color-text-muted);
+        }
+
+        .activity-amount-box {
+          text-align: right;
+        }
+
+        .activity-amount {
+          font-weight: 800;
+          color: var(--color-income);
+          font-size: 1.1rem;
+        }
+
+        .empty-state-mini {
+          padding: 4rem 2rem;
+          text-align: center;
+          color: var(--color-text-muted);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+        }
       `}</style>
     </div>
   );
