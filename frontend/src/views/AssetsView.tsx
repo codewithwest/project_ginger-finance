@@ -40,12 +40,12 @@ export default function AssetsView() {
       if (result.data) {
         setAssets(result.data.myAssets);
       }
+      setLoading(false); // Set loading to false on success
     } catch (err) {
       console.error('Failed to fetch assets:', err);
-    } finally {
-      setLoading(false);
+      setLoading(false); // Set loading to false on error
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     fetchAssets();

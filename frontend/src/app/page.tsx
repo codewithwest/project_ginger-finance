@@ -26,7 +26,7 @@ export default function Page() {
   if (!mounted) return null;
 
   if (user) {
-    return <Dashboard userId={user._id} />;
+    return <Dashboard />;
   }
 
   return <LandingPage />;

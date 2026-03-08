@@ -10,8 +10,9 @@ export class UsersResolver {
 
   @Query(() => User)
   @UseGuards(JwtAuthGuard)
-  async me(@Context() context: any) {
-    const userId = context.req.user.userId;
+  async me(@Context('req') req: any) {
+    const userId = req.user?.userId;
+    if (!userId) throw new Error('Not authenticated');
     return this.usersService.findById(userId);
   }
 

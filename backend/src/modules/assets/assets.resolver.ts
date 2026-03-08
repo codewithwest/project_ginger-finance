@@ -1,5 +1,5 @@
-import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
-import { UseGuards, Request } from '@nestjs/common';
+import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import { UseGuards } from '@nestjs/common';
 import { AssetsService } from './assets.service';
 import { Asset } from './schemas/asset.schema';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -11,21 +11,21 @@ export class AssetsResolver {
 
   @Mutation(() => Asset)
   @UseGuards(JwtAuthGuard)
-  @Mutation(() => Asset)
-  @UseGuards(JwtAuthGuard)
   async createAsset(
-    @Request() req: { user: { householdId: string } },
+    @Context('req') req: any,
     @Args('input') input: CreateAssetInput,
   ) {
-    if (!req.user.householdId) throw new Error('User does not belong to a household');
-    return this.assetsService.create(req.user.householdId, input);
+    const householdId = req.user?.householdId;
+    if (!householdId) throw new Error('User does not belong to a household');
+    return this.assetsService.create(householdId, input);
   }
 
   @Query(() => [Asset])
   @UseGuards(JwtAuthGuard)
-  async myAssets(@Request() req: { user: { householdId: string } }) {
-    if (!req.user.householdId) return [];
-    return this.assetsService.findAll(req.user.householdId);
+  async myAssets(@Context('req') req: any) {
+    const householdId = req.user?.householdId;
+    if (!householdId) return [];
+    return this.assetsService.findAll(householdId);
   }
 
   @Query(() => Asset, { nullable: true })

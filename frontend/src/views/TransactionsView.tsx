@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { graphqlFetch } from '@/lib/graphql';
-import { ArrowDownRight, ArrowUpRight, Filter, SortDesc, Search, ChevronDown } from 'lucide-react';
+import { Filter, SortDesc, Search, ChevronDown } from 'lucide-react';
 
 interface Transaction {
   _id: string;

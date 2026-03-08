@@ -17,9 +17,9 @@ export class TransactionsResolver {
   @UseGuards(JwtAuthGuard)
   async createTransaction(
     @Args('input') input: CreateTransactionInput,
-    @Context() ctx: GqlContext,
+    @Context('req') req: any,
   ) {
-    const householdId = ctx.req.user.householdId;
+    const householdId = req.user?.householdId;
     if (!householdId) throw new Error('User does not belong to a household');
     return this.transactionsService.create(householdId, input);
   }
@@ -27,11 +27,11 @@ export class TransactionsResolver {
   @Query(() => [Transaction])
   @UseGuards(JwtAuthGuard)
   async myTransactions(
-    @Context() ctx: GqlContext,
+    @Context('req') req: any,
     @Args('type', { type: () => String, nullable: true }) type?: string,
     @Args('sort', { type: () => String, nullable: true }) sort?: string,
   ) {
-    const householdId = ctx.req.user.householdId;
+    const householdId = req.user?.householdId;
     if (!householdId) return [];
     return this.transactionsService.findAll(householdId, { type, sort });
   }

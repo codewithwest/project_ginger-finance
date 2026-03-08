@@ -65,11 +65,11 @@ export default function SavingsView() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [userId, fetchData]);
+  }, [fetchData]);
 
   const totalSavings = accounts.reduce((sum, acc) => sum + acc.balance, 0);
 
