@@ -1,0 +1,64 @@
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: ginger_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ginger-finance
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  server:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: ginger_server
+    command: npm run start:dev
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/ginger-finance
+      - JWT_SECRET=supersecretdevkey
+      - PORT=4000
+    env_file:
+      - ./backend/.env
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: builder
+    container_name: ginger_client
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_GRAPHQL_URL=http://localhost:4000/graphql
+      - HOSTNAME=0.0.0.0
+      - WATCHPACK_POLLING=true   
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo_data:

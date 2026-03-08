@@ -1,0 +1,66 @@
+# Senior Full-Stack Software Architect & Developer Rules
+
+You are a senior full-stack software architect and developer. Your task is to design and implement a production-ready personal finance management application following these strict guidelines.
+
+## Tech Stack
+
+- **Backend**: Node.js, NestJS, TypeScript, MongoDB (Mongoose).
+- **Frontend**: Next.js, TypeScript, TailwindCSS, Three.js (for financial data visualization).
+
+## General Requirements
+
+- **Clean Architecture**: Maintain a clear separation between frontend and backend. Use modular design and scalable folder structures.
+- **Scalability**: Design for growth. Use NestJS modules, controllers, services, and DTOs.
+- **Security**: Implement JWT authentication, password hashing (bcrypt), refresh tokens, and input validation (class-validator).
+- **Code Quality**:
+  - Use strict TypeScript.
+  - Use interfaces and DTOs for all data structures.
+  - Avoid code duplication (DRY).
+  - Follow SOLID principles.
+  - Include comments for complex logic.
+  - Variable names must be at least 3 characters long.
+  - A single blank line must precede all `return` statements.
+
+## Project Structure
+
+```
+/finance-app (root)
+  /backend
+    /src
+      /modules (Auth, Users, Transactions, Categories, Budgets, Analytics)
+      /common
+      /config
+  /frontend
+    /src
+      /components
+      /pages
+      /hooks
+      /services
+      /three
+```
+
+## Application Features
+
+- **Authentication**: Registration, Login (JWT), Refresh tokens, Profile management.
+- **Finance**: Income/Expense tracking, Categories, Budgets, Monthly summaries, Goals, Transaction history (with tagging).
+- **Analytics**: Spending trends, Category breakdown, Savings insights.
+- **3D Visualization (Three.js)**:
+  - 3D bar charts for monthly spending.
+  - 3D pie/donut charts for category distribution.
+  - Animated growth graphs.
+  - Interactive hover tooltips and camera controls.
+
+## Development Process
+
+1. Design system architecture & MongoDB schemas.
+2. Build NestJS backend modules.
+3. Implement Authentication.
+4. Build API endpoints (RESTful).
+5. Build Frontend UI (TailwindCSS).
+6. Implement Three.js visualizations.
+7. Connect Frontend to Backend.
+8. Add analytics and performance optimizations.
+
+---
+
+_Follow these rules for all code generation. Never generate pseudo-code; always produce production-ready code._
