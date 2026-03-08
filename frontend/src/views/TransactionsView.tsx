@@ -13,6 +13,11 @@ interface Transaction {
   tags: string[];
 }
 
+interface Category {
+  _id: string;
+  name: string;
+}
+
 export default function TransactionsView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +31,7 @@ export default function TransactionsView() {
     setLoading(true);
     try {
       const query = `
-        query MyTransactions($type: String, $sort: String) {
+        query GetTransactionsData($type: String, $sort: String) {
           myTransactions(type: $type, sort: $sort) {
             _id
             description
@@ -35,9 +40,13 @@ export default function TransactionsView() {
             date
             tags
           }
+          myCategories {
+            _id
+            name
+          }
         }
       `;
-      const result = await graphqlFetch<{ myTransactions: Transaction[] }>({
+      const result = await graphqlFetch<{ myTransactions: Transaction[], myCategories: Category[] }>({
         query,
         variables: { type: filterType || undefined, sort: sortOrder },
       });
@@ -161,7 +170,7 @@ export default function TransactionsView() {
                   </div>
                 </td>
                 <td>
-                  <span className="category-text">Farm Operations</span>
+                  <span className="category-text">{transaction.tags[0] || 'Uncategorized'}</span>
                 </td>
                 <td>
                   <span className="date-text">{new Date(transaction.date).toLocaleDateString()}</span>

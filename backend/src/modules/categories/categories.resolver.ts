@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { Category } from './schemas/category.schema';
@@ -10,7 +10,9 @@ export class CategoriesResolver {
 
   @Query(() => [Category])
   @UseGuards(JwtAuthGuard)
-  async myCategories(@Args('userId', { type: () => ID }) userId: string) {
+  async myCategories(@Context('req') req: { user?: { userId: string } }) {
+    const userId = req.user?.userId;
+    if (!userId) return [];
     return this.categoriesService.findAll(userId);
   }
 }

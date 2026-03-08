@@ -111,7 +111,7 @@ type Query {
   farmCycle(id: ID!): FarmCycle
   me: User!
   myAssets: [Asset!]!
-  myCategories(userId: ID!): [Category!]!
+  myCategories: [Category!]!
   myFarmCycles(userId: ID!): [FarmCycle!]!
   myHousehold: Household
   mySavingsAccounts: [SavingsAccount!]!

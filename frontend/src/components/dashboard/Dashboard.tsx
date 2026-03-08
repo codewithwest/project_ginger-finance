@@ -55,8 +55,15 @@ export default function Dashboard() {
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    window.location.reload();
+    window.location.href = '/'; // More reliable than reload for routing
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/';
+    }
+  }, []);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);

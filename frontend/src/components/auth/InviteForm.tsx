@@ -41,6 +41,13 @@ export default function InviteForm({ token }: Props) {
 
       if (data?.registerWithInvite?.accessToken) {
         localStorage.setItem('token', data.registerWithInvite.accessToken);
+        // Storing user object to ensure Dashboard.tsx doesn't see a null user
+        const userData = {
+          username,
+          email: '', // Backend doesn't return email in AuthResponse yet, but username is enough for 'Welcome back'
+        };
+        localStorage.setItem('user', JSON.stringify(userData));
+        
         setSuccess(true);
         setTimeout(() => {
           router.push('/dashboard');
@@ -83,9 +90,9 @@ export default function InviteForm({ token }: Props) {
           </div>
         )}
 
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Username</label>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1 block">Username</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-emerald-500 transition-colors">
                 <UserIcon size={18} />
@@ -93,7 +100,8 @@ export default function InviteForm({ token }: Props) {
               <input
                 type="text"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300"
+                autoComplete="username"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300"
                 placeholder="Choose a username"
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
@@ -101,8 +109,8 @@ export default function InviteForm({ token }: Props) {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">Secret Password</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1 block">Secret Password</label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500 group-focus-within:text-emerald-500 transition-colors">
                 <Lock size={18} />
@@ -110,7 +118,8 @@ export default function InviteForm({ token }: Props) {
               <input
                 type="password"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300"
+                autoComplete="new-password"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 pl-12 pr-4 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-300"
                 placeholder="••••••••"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
