@@ -45,7 +45,7 @@ interface DashboardData {
   myTransactions: Transaction[];
 }
 
-export default function Dashboard({ userId }: { userId: string }) {
+export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -63,7 +63,6 @@ export default function Dashboard({ userId }: { userId: string }) {
     try {
       const result = await graphqlFetch<DashboardData>({
         query: GET_DASHBOARD_DATA,
-        variables: { userId },
       });
 
       if (result.errors) {
@@ -75,11 +74,11 @@ export default function Dashboard({ userId }: { userId: string }) {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     fetchData();
-  }, [userId, fetchData]);
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     if (!data) return { netWorth: 0, totalAssets: 0, totalSavings: 0 };
@@ -112,11 +111,11 @@ export default function Dashboard({ userId }: { userId: string }) {
 
     switch (activeTab) {
       case 'transactions':
-        return <TransactionsView userId={userId} />;
+        return <TransactionsView />;
       case 'assets':
-        return <AssetsView userId={userId} />;
+        return <AssetsView />;
       case 'savings':
-        return <SavingsView userId={userId} />;
+        return <SavingsView />;
       case 'household':
         return <HouseholdSettingsView />;
       default:
@@ -225,7 +224,6 @@ export default function Dashboard({ userId }: { userId: string }) {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         onSuccess={() => fetchData()} 
-        userId={userId} 
       />
 
       <style jsx>{`

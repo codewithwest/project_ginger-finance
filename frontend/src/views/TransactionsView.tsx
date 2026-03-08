@@ -13,7 +13,7 @@ interface Transaction {
   tags: string[];
 }
 
-export default function TransactionsView({ userId }: { userId: string }) {
+export default function TransactionsView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<string>('');
@@ -26,8 +26,8 @@ export default function TransactionsView({ userId }: { userId: string }) {
     setLoading(true);
     try {
       const query = `
-        query MyTransactions($userId: ID!, $type: String, $sort: String) {
-          myTransactions(userId: $userId, type: $type, sort: $sort) {
+        query MyTransactions($type: String, $sort: String) {
+          myTransactions(type: $type, sort: $sort) {
             _id
             description
             amount
@@ -39,7 +39,7 @@ export default function TransactionsView({ userId }: { userId: string }) {
       `;
       const result = await graphqlFetch<{ myTransactions: Transaction[] }>({
         query,
-        variables: { userId, type: filterType || undefined, sort: sortOrder },
+        variables: { type: filterType || undefined, sort: sortOrder },
       });
       if (result.data) {
         setTransactions(result.data.myTransactions);
@@ -49,7 +49,7 @@ export default function TransactionsView({ userId }: { userId: string }) {
     } finally {
       setLoading(false);
     }
-  }, [userId, filterType, sortOrder]);
+  }, [filterType, sortOrder]);
 
   useEffect(() => {
     fetchTransactions();

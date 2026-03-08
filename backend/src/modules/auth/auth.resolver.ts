@@ -1,10 +1,14 @@
 import { Resolver, Mutation, Args, ObjectType, Field } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
+import { User } from '../users/schemas/user.schema';
 
 @ObjectType()
 class AuthResponse {
   @Field()
   accessToken: string;
+
+  @Field(() => User, { nullable: true })
+  user?: User;
 }
 
 @ObjectType()

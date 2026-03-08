@@ -16,6 +16,7 @@ type Asset {
 
 type AuthResponse {
   accessToken: String!
+  user: User
 }
 
 type BooleanResponse {

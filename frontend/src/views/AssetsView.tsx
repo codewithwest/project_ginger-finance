@@ -14,7 +14,7 @@ interface Asset {
   purchaseDate: string;
 }
 
-export default function AssetsView({ userId }: { userId: string }) {
+export default function AssetsView() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -23,8 +23,8 @@ export default function AssetsView({ userId }: { userId: string }) {
     setLoading(true);
     try {
       const query = `
-        query MyAssets($userId: ID!) {
-          myAssets(userId: $userId) {
+        query MyAssets {
+          myAssets {
             _id
             name
             category
@@ -36,7 +36,6 @@ export default function AssetsView({ userId }: { userId: string }) {
       `;
       const result = await graphqlFetch<{ myAssets: Asset[] }>({
         query,
-        variables: { userId },
       });
       if (result.data) {
         setAssets(result.data.myAssets);
@@ -50,7 +49,7 @@ export default function AssetsView({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchAssets();
-  }, [userId, fetchAssets]);
+  }, [fetchAssets]);
 
   const totalValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0);
   const totalGrowth = assets.reduce((sum, asset) => sum + (asset.currentValue - asset.purchasePrice), 0);

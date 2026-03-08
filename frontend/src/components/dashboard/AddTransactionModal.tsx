@@ -8,7 +8,6 @@ interface AddTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  userId: string;
   defaultType?: 'income' | 'expense' | 'savings';
 }
 
@@ -18,7 +17,7 @@ interface Category {
   color: string;
 }
 
-export default function AddTransactionModal({ isOpen, onClose, onSuccess, userId, defaultType = 'expense' }: AddTransactionModalProps) {
+export default function AddTransactionModal({ isOpen, onClose, onSuccess, defaultType = 'expense' }: AddTransactionModalProps) {
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
@@ -39,15 +38,14 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, userId
         try {
           const result = await graphqlFetch<{ myCategories: Category[] }>({
             query: `
-              query MyCategories($userId: ID!) {
-                myCategories(userId: $userId) {
+              query MyCategories {
+                myCategories {
                   _id
                   name
                   color
                 }
               }
             `,
-            variables: { userId },
           });
           if (result.data) {
             setCategories(result.data.myCategories);
@@ -61,7 +59,7 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, userId
       };
       fetchCategories();
     }
-  }, [isOpen, userId]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -93,7 +91,6 @@ export default function AddTransactionModal({ isOpen, onClose, onSuccess, userId
             date: new Date(formData.date).toISOString(),
             categoryId: formData.categoryId,
             tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
-            userId,
           },
         },
       });

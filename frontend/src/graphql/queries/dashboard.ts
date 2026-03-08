@@ -1,24 +1,24 @@
 export const GET_DASHBOARD_DATA = `
-  query GetDashboardData($userId: ID!) {
+  query GetDashboardData {
     me {
       _id
       username
       email
     }
-    myAssets(userId: $userId) {
+    myAssets {
       _id
       name
       category
       currentValue
       purchasePrice
     }
-    mySavingsAccounts(userId: $userId) {
+    mySavingsAccounts {
       _id
       accountName
       balance
       currency
     }
-    myTransactions(userId: $userId) {
+    myTransactions {
       _id
       type
       amount

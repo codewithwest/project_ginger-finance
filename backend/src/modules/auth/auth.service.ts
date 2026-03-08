@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { HouseholdsService } from '../households/households.service';
@@ -7,6 +7,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -32,6 +33,7 @@ export class AuthService {
     };
     return {
       accessToken: this.jwtService.sign(payload),
+      user,
     };
   }
 
@@ -77,9 +79,9 @@ export class AuthService {
     await this.mailService.sendPasswordResetEmail(email, resetLink);
   }
 
-  async resetPassword(token: string, newPassword: string): Promise<boolean> {
-    const salt = await bcrypt.genSalt();
-    const passwordHash = await bcrypt.hash(newPassword, salt);
+  async resetPassword(token: string, password: string): Promise<boolean> {
+    this.logger.log(`Attempting password reset with token: ${token.substring(0, 8)}...`);
+    const passwordHash = await bcrypt.hash(password, 10);
     return this.usersService.resetPassword(token, passwordHash);
   }
 }

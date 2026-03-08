@@ -22,7 +22,7 @@ interface Transaction {
   type: string;
 }
 
-export default function SavingsView({ userId }: { userId: string }) {
+export default function SavingsView() {
   const [accounts, setAccounts] = useState<SavingsAccount[]>([]);
   const [history, setHistory] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,15 +33,15 @@ export default function SavingsView({ userId }: { userId: string }) {
     setLoading(true);
     try {
       const query = `
-        query GetSavingsData($userId: ID!) {
-          mySavingsAccounts(userId: $userId) {
+        query GetSavingsData {
+          mySavingsAccounts {
             _id
             accountName
             accountType
             balance
             currency
           }
-          myTransactions(userId: $userId, type: "savings") {
+          myTransactions(type: "savings") {
             _id
             description
             amount
@@ -55,7 +55,6 @@ export default function SavingsView({ userId }: { userId: string }) {
         myTransactions: Transaction[] 
       }>({
         query,
-        variables: { userId },
       });
       if (result.data) {
         setAccounts(result.data.mySavingsAccounts);
@@ -101,7 +100,6 @@ export default function SavingsView({ userId }: { userId: string }) {
         isOpen={isContributionModalOpen}
         onClose={() => setIsContributionModalOpen(false)}
         onSuccess={fetchData}
-        userId={userId}
         defaultType="savings"
       />
 

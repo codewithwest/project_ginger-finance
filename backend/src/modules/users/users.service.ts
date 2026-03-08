@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async create(
@@ -85,12 +86,21 @@ export class UsersService {
   }
 
   async resetPassword(token: string, newPasswordHash: string): Promise<boolean> {
+    const now = new Date();
     const user = await this.userModel.findOne({
       passwordResetToken: token,
-      passwordResetExpiry: { $gt: new Date() },
+      passwordResetExpiry: { $gt: now },
     }).exec();
 
-    if (!user) return false;
+    if (!user) {
+      const foundByToken = await this.userModel.findOne({ passwordResetToken: token }).exec();
+      if (foundByToken) {
+        this.logger.warn(`Reset failed: Token found but expired. Expiry: ${foundByToken.passwordResetExpiry}, Now: ${now}`);
+      } else {
+        this.logger.warn(`Reset failed: Token not found.`);
+      }
+      return false;
+    }
 
     await this.userModel.findByIdAndUpdate(user._id, {
       passwordHash: newPasswordHash,
@@ -98,6 +108,7 @@ export class UsersService {
       passwordResetExpiry: null,
     }).exec();
 
+    this.logger.log(`Password reset successful for user: ${user.email}`);
     return true;
   }
 }
