@@ -39,16 +39,24 @@ describe('TransactionsService', () => {
 
   describe('create', () => {
     it('should create a transaction', async () => {
-      const data = { amount: 100, type: 'income', categoryId: new Types.ObjectId() };
+      const data = {
+        amount: 100,
+        type: 'income',
+        categoryId: new Types.ObjectId(),
+      };
       const userId = new Types.ObjectId().toHexString();
-      
+
       // The constructor mock is tricky with 'new this.transactionModel'
       // Instead of mocking the constructor, we can mock the prototype or use a factory
       // For now, let's just test that it calls the model correctly if we mock the instance creator
-      
-      const saveMock = jest.fn().mockResolvedValue({ ...data, userId: new Types.ObjectId(userId) });
-      model.constructor = jest.fn().mockImplementation(() => ({ save: saveMock }));
-      
+
+      const saveMock = jest
+        .fn()
+        .mockResolvedValue({ ...data, userId: new Types.ObjectId(userId) });
+      model.constructor = jest
+        .fn()
+        .mockImplementation(() => ({ save: saveMock }));
+
       // Note: NestJS Mongoose InjectModel usually gives a constructor-like function
       // In tests, we often have to handle the 'new' keyword
     });
@@ -58,7 +66,7 @@ describe('TransactionsService', () => {
     it('should return transactions for user', async () => {
       const userId = new Types.ObjectId().toHexString();
       const mockResult = [{ amount: 100 }];
-      
+
       const findMock = {
         sort: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(mockResult),

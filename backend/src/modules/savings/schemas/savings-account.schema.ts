@@ -31,4 +31,5 @@ export class SavingsAccount {
   currency: string;
 }
 
-export const SavingsAccountSchema = SchemaFactory.createForClass(SavingsAccount);
+export const SavingsAccountSchema =
+  SchemaFactory.createForClass(SavingsAccount);

@@ -9,8 +9,10 @@ import { v4 as uuidv4 } from 'uuid';
 @Injectable()
 export class HouseholdsService {
   constructor(
-    @InjectModel(Household.name) private householdModel: Model<HouseholdDocument>,
-    @InjectModel(Invitation.name) private invitationModel: Model<InvitationDocument>,
+    @InjectModel(Household.name)
+    private householdModel: Model<HouseholdDocument>,
+    @InjectModel(Invitation.name)
+    private invitationModel: Model<InvitationDocument>,
     private readonly mailService: MailService,
   ) {}
 
@@ -61,7 +63,9 @@ export class HouseholdsService {
     return invitation;
   }
 
-  async getInvitationByToken(token: string): Promise<InvitationDocument | null> {
+  async getInvitationByToken(
+    token: string,
+  ): Promise<InvitationDocument | null> {
     return await this.invitationModel
       .findOne({ token, status: 'pending' })
       .exec();
@@ -71,7 +75,10 @@ export class HouseholdsService {
     await this.invitationModel.findByIdAndUpdate(id, { status: 'used' }).exec();
   }
 
-  async addMemberToHousehold(householdId: string, userId: string): Promise<void> {
+  async addMemberToHousehold(
+    householdId: string,
+    userId: string,
+  ): Promise<void> {
     await this.householdModel
       .findByIdAndUpdate(householdId, {
         $push: { members: new Types.ObjectId(userId) },

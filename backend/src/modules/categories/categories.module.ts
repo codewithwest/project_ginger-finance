@@ -7,7 +7,9 @@ import { CategoriesResolver } from './categories.resolver';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Category.name, schema: CategorySchema }]),
+    MongooseModule.forFeature([
+      { name: Category.name, schema: CategorySchema },
+    ]),
   ],
   providers: [CategoriesService, CategoriesResolver],
   controllers: [CategoriesController],

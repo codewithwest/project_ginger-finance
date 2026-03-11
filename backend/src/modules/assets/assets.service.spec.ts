@@ -37,7 +37,7 @@ describe('AssetsService', () => {
     it('should return assets for user', async () => {
       const userId = new Types.ObjectId().toHexString();
       const mockResult = [{ name: 'Tractor' }];
-      
+
       model.find.mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockResult),
       });

@@ -40,7 +40,7 @@ describe('FarmCyclesService', () => {
     it('should return cycles for user', async () => {
       const userId = new Types.ObjectId().toHexString();
       const mockResult = [{ name: '2026 Maize' }];
-      
+
       const findMock = {
         exec: jest.fn().mockResolvedValue(mockResult),
       };
@@ -48,7 +48,9 @@ describe('FarmCyclesService', () => {
 
       const result = await service.findAll(userId);
       expect(result).toEqual(mockResult);
-      expect(model.find).toHaveBeenCalledWith({ userId: new Types.ObjectId(userId) });
+      expect(model.find).toHaveBeenCalledWith({
+        userId: new Types.ObjectId(userId),
+      });
     });
   });
 
@@ -56,14 +58,18 @@ describe('FarmCyclesService', () => {
     it('should update cycle status', async () => {
       const cycleId = new Types.ObjectId().toHexString();
       const mockResult = { _id: cycleId, isCompleted: true };
-      
+
       model.findByIdAndUpdate.mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockResult),
       });
 
       const result = await service.markAsCompleted(cycleId);
       expect(result).toEqual(mockResult);
-      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(cycleId, { isCompleted: true }, { new: true });
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+        cycleId,
+        { isCompleted: true },
+        { new: true },
+      );
     });
   });
 });

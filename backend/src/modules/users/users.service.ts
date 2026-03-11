@@ -77,36 +77,49 @@ export class UsersService {
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    await this.userModel.findByIdAndUpdate(user._id, {
-      passwordResetToken: token,
-      passwordResetExpiry: expiry,
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(user._id, {
+        passwordResetToken: token,
+        passwordResetExpiry: expiry,
+      })
+      .exec();
 
     return token;
   }
 
-  async resetPassword(token: string, newPasswordHash: string): Promise<boolean> {
+  async resetPassword(
+    token: string,
+    newPasswordHash: string,
+  ): Promise<boolean> {
     const now = new Date();
-    const user = await this.userModel.findOne({
-      passwordResetToken: token,
-      passwordResetExpiry: { $gt: now },
-    }).exec();
+    const user = await this.userModel
+      .findOne({
+        passwordResetToken: token,
+        passwordResetExpiry: { $gt: now },
+      })
+      .exec();
 
     if (!user) {
-      const foundByToken = await this.userModel.findOne({ passwordResetToken: token }).exec();
+      const foundByToken = await this.userModel
+        .findOne({ passwordResetToken: token })
+        .exec();
       if (foundByToken) {
-        this.logger.warn(`Reset failed: Token found but expired. Expiry: ${foundByToken.passwordResetExpiry}, Now: ${now}`);
+        this.logger.warn(
+          `Reset failed: Token found but expired. Expiry: ${foundByToken.passwordResetExpiry}, Now: ${now}`,
+        );
       } else {
         this.logger.warn(`Reset failed: Token not found.`);
       }
       return false;
     }
 
-    await this.userModel.findByIdAndUpdate(user._id, {
-      passwordHash: newPasswordHash,
-      passwordResetToken: null,
-      passwordResetExpiry: null,
-    }).exec();
+    await this.userModel
+      .findByIdAndUpdate(user._id, {
+        passwordHash: newPasswordHash,
+        passwordResetToken: null,
+        passwordResetExpiry: null,
+      })
+      .exec();
 
     this.logger.log(`Password reset successful for user: ${user.email}`);
     return true;

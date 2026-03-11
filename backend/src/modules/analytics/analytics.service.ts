@@ -17,10 +17,16 @@ export class AnalyticsService {
   async getNetWorth(userId: string) {
     const assets = await this.assetsService.findAll(userId);
     const savings = await this.savingsService.findAll(userId);
-    
-    const totalAssetsValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0);
-    const totalSavings = savings.reduce((sum, account) => sum + account.balance, 0);
-    
+
+    const totalAssetsValue = assets.reduce(
+      (sum, asset) => sum + asset.currentValue,
+      0,
+    );
+    const totalSavings = savings.reduce(
+      (sum, account) => sum + account.balance,
+      0,
+    );
+
     // In a full implementation, we'd subtract liabilities here
     return {
       totalAssetsValue,
@@ -31,15 +37,15 @@ export class AnalyticsService {
 
   async getFarmCycleProfitability(cycleId: string) {
     const transactions = await this.transactionsService.findAllByCycle(cycleId);
-    
+
     const totalExpenses = transactions
-      .filter(t => t.type === 'expense')
+      .filter((t) => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
-      
+
     const totalIncome = transactions
-      .filter(t => t.type === 'income')
+      .filter((t) => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
-      
+
     return {
       totalExpenses,
       totalIncome,

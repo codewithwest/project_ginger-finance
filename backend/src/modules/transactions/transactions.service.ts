@@ -7,7 +7,8 @@ import { SavingsService } from '../savings/savings.service';
 @Injectable()
 export class TransactionsService {
   constructor(
-    @InjectModel(Transaction.name) private transactionModel: Model<TransactionDocument>,
+    @InjectModel(Transaction.name)
+    private transactionModel: Model<TransactionDocument>,
     private readonly savingsService: SavingsService,
   ) {}
 
@@ -27,7 +28,10 @@ export class TransactionsService {
     return await transaction.save();
   }
 
-  async findAll(householdId: string, query: any): Promise<TransactionDocument[]> {
+  async findAll(
+    householdId: string,
+    query: any,
+  ): Promise<TransactionDocument[]> {
     const filter: any = { householdId: new Types.ObjectId(householdId) };
     if (query.type) filter.type = query.type;
 
@@ -38,7 +42,7 @@ export class TransactionsService {
       sort.date = -1; // Default to descending
     }
 
-    return await this.transactionModel.find(filter as any).sort(sort).exec();
+    return await this.transactionModel.find(filter).sort(sort).exec();
   }
 
   async findOne(id: string): Promise<TransactionDocument | null> {

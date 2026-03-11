@@ -15,10 +15,16 @@ export class AuthService {
     private readonly mailService: MailService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<Record<string, unknown> | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Record<string, unknown> | null> {
     const user = await this.usersService.findByEmail(email);
-    if (user && await bcrypt.compare(password, user.passwordHash)) {
-      const { passwordHash: _ph, ...result } = user.toObject() as Record<string, unknown>;
+    if (user && (await bcrypt.compare(password, user.passwordHash))) {
+      const { passwordHash: _ph, ...result } = user.toObject() as Record<
+        string,
+        unknown
+      >;
       return result;
     }
     return null;
@@ -37,11 +43,7 @@ export class AuthService {
     };
   }
 
-  async registerWithInvite(
-    token: string,
-    username: string,
-    password: string,
-  ) {
+  async registerWithInvite(token: string, username: string, password: string) {
     const invitation = await this.householdsService.getInvitationByToken(token);
     if (!invitation) {
       throw new BadRequestException('Invalid or expired invitation token');
@@ -80,7 +82,9 @@ export class AuthService {
   }
 
   async resetPassword(token: string, password: string): Promise<boolean> {
-    this.logger.log(`Attempting password reset with token: ${token.substring(0, 8)}...`);
+    this.logger.log(
+      `Attempting password reset with token: ${token.substring(0, 8)}...`,
+    );
     const passwordHash = await bcrypt.hash(password, 10);
     return this.usersService.resetPassword(token, passwordHash);
   }

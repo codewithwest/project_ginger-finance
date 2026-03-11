@@ -34,7 +34,9 @@ describe('AnalyticsService', () => {
         { type: 'expense', amount: 500 },
         { type: 'income', amount: 5000 },
       ];
-      (transactionsService.findAllByCycle as jest.Mock).mockResolvedValue(mockTransactions);
+      (transactionsService.findAllByCycle as jest.Mock).mockResolvedValue(
+        mockTransactions,
+      );
 
       const result = await service.getFarmCycleProfitability('cycle123');
       expect(result.totalExpenses).toBe(1500);

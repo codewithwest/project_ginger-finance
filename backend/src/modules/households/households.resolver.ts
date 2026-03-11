@@ -30,7 +30,10 @@ export class HouseholdsResolver {
     if (user.role !== 'SUPER_ADMIN') {
       throw new ForbiddenException('Only SUPER_ADMIN can create households');
     }
-    return this.householdsService.createHouseholdAndAdminInvite(name, adminEmail);
+    return this.householdsService.createHouseholdAndAdminInvite(
+      name,
+      adminEmail,
+    );
   }
 
   /**
@@ -43,12 +46,17 @@ export class HouseholdsResolver {
     @CurrentUser() user: JwtUser,
   ) {
     if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {
-      throw new ForbiddenException('Only ADMIN or SUPER_ADMIN can invite members');
+      throw new ForbiddenException(
+        'Only ADMIN or SUPER_ADMIN can invite members',
+      );
     }
     if (!user.householdId) {
       throw new ForbiddenException('User does not belong to a household');
     }
-    return this.householdsService.inviteMember(user.householdId.toString(), email);
+    return this.householdsService.inviteMember(
+      user.householdId.toString(),
+      email,
+    );
   }
 
   @Query(() => Household, { nullable: true })

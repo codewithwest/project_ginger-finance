@@ -10,7 +10,9 @@ import { FinancialGoal, FinancialGoalSchema } from './schemas/goal.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: FinancialGoal.name, schema: FinancialGoalSchema }]),
+    MongooseModule.forFeature([
+      { name: FinancialGoal.name, schema: FinancialGoalSchema },
+    ]),
     TransactionsModule,
     AssetsModule,
     SavingsModule,

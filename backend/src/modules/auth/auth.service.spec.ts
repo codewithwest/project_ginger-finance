@@ -48,7 +48,7 @@ describe('AuthService', () => {
           username: 'testuser',
         }),
       };
-      
+
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockResult);
 
       const result = await service.validateUser('test@test.com', password);
@@ -61,7 +61,10 @@ describe('AuthService', () => {
       const mockResult = { email: 'test@test.com', passwordHash: 'hash' };
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockResult);
 
-      const result = await service.validateUser('test@test.com', 'wrongpassword');
+      const result = await service.validateUser(
+        'test@test.com',
+        'wrongpassword',
+      );
       expect(result).toBeNull();
     });
   });

@@ -1,5 +1,11 @@
 import { InputType, Field, Float } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsNumber, IsEnum, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 
 @InputType()
 export class CreateSavingsAccountInput {

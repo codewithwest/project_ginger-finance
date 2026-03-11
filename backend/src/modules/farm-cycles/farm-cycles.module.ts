@@ -8,7 +8,9 @@ import { FarmCyclesResolver } from './farm-cycles.resolver';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: FarmCycle.name, schema: FarmCycleSchema }]),
+    MongooseModule.forFeature([
+      { name: FarmCycle.name, schema: FarmCycleSchema },
+    ]),
   ],
   providers: [FarmCyclesService, FarmCyclesResolver],
   controllers: [FarmCyclesController],
