@@ -16,9 +16,8 @@ export const bootstrap = async () => {
     process.env.ALLOWED_ORIGINS;
 
   if (typeof allowedOrigins === 'string') {
-    allowedOrigins = allowedOrigins.split(',');
-    
-    console.log(allowedOrigins);
+    allowedOrigins = allowedOrigins.split(',').map((o) => o.trim());
+    console.log('Allowed Origins:', allowedOrigins);
   }
 
   app.enableCors({

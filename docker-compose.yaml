@@ -29,7 +29,8 @@ services:
       - ./backend:/app
       - /app/node_modules
     environment:
-      - MONGODB_URI=mongodb://mongodb:27017/ginger-finance
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB_NAME=ginger-finance
       - JWT_SECRET=supersecretdevkey
       - PORT=4000
     env_file:

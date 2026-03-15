@@ -24,6 +24,7 @@ import { FarmCyclesModule } from './modules/farm-cycles/farm-cycles.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
+        dbName: configService.get<string>('MONGODB_DB_NAME'),
       }),
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
