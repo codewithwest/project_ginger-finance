@@ -45,6 +45,15 @@ export class SeedService implements OnApplicationBootstrap {
       return;
     }
 
+    const usernameExisting =
+      await this.usersService.findByUsername('superadmin');
+    if (usernameExisting) {
+      this.logger.log(
+        `User with username 'superadmin' already exists. Skipping super admin creation.`,
+      );
+      return;
+    }
+
     // Generate a random temporary password (user will reset via email)
     const tempPassword = crypto.randomBytes(16).toString('hex');
     const salt = await bcrypt.genSalt();
