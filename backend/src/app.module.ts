@@ -28,7 +28,7 @@ import { FarmCyclesModule } from './modules/farm-cycles/farm-cycles.module';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      autoSchemaFile: join(process.cwd(), 'src/schema.generated.gql'),
       sortSchema: true,
       playground: true,
       context: ({ req }: { req: Request }) => ({ req }),

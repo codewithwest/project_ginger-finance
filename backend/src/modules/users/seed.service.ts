@@ -1,11 +1,16 @@
-import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnApplicationBootstrap,
+  Inject,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 
 @Injectable()
-export class SeedService implements OnModuleInit {
+export class SeedService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SeedService.name);
 
   constructor(
@@ -13,7 +18,7 @@ export class SeedService implements OnModuleInit {
     @Inject(MailService) private readonly mailService: MailService,
   ) {}
 
-  async onModuleInit() {
+  async onApplicationBootstrap() {
     await this.seedSuperAdmin();
   }
 
@@ -28,6 +33,14 @@ export class SeedService implements OnModuleInit {
     if (!email) {
       this.logger.warn(
         'SEED_SUPER_ADMIN_EMAIL not set — skipping super admin seed.',
+      );
+      return;
+    }
+
+    const emailExisting = await this.usersService.findByEmail(email);
+    if (emailExisting) {
+      this.logger.log(
+        `User with email ${email} already exists. Skipping super admin creation.`,
       );
       return;
     }

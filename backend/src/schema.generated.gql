@@ -1,0 +1,154 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Asset {
+  _id: ID!
+  attachments: [String!]!
+  category: String!
+  currentValue: Float!
+  householdId: ID!
+  name: String!
+  notes: String
+  purchaseDate: DateTime!
+  purchasePrice: Float!
+}
+
+type AuthResponse {
+  accessToken: String!
+  user: User
+}
+
+type BooleanResponse {
+  success: Boolean!
+}
+
+type Category {
+  _id: ID!
+  color: String
+  icon: String
+  name: String!
+  userId: ID!
+}
+
+input CreateAssetInput {
+  category: String!
+  currentValue: Float!
+  name: String!
+  notes: String
+  purchaseDate: DateTime!
+  purchasePrice: Float!
+}
+
+input CreateSavingsAccountInput {
+  accountName: String!
+  accountType: String!
+  balance: Float! = 0
+  currency: String! = "ZAR"
+}
+
+input CreateTransactionInput {
+  amount: Float!
+  assetId: ID
+  categoryId: ID!
+  cycleId: ID
+  date: DateTime
+  description: String!
+  savingsAccountId: ID
+  tags: [String!]
+  type: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FarmCycle {
+  _id: ID!
+  cropType: String!
+  expectedHarvestDate: DateTime
+  isCompleted: Boolean!
+  name: String!
+  notes: String
+  startDate: DateTime!
+  userId: ID!
+}
+
+type Household {
+  _id: ID!
+  createdAt: DateTime!
+  members: [User!]!
+  name: String!
+  updatedAt: DateTime!
+}
+
+type Invitation {
+  _id: ID!
+  createdAt: DateTime!
+  email: String!
+  householdId: ID!
+  role: String!
+  status: String!
+  token: String!
+  updatedAt: DateTime!
+}
+
+type Mutation {
+  createAsset(input: CreateAssetInput!): Asset!
+  createHouseholdAndAdminInvite(adminEmail: String!, name: String!): Invitation!
+  createSavingsAccount(input: CreateSavingsAccountInput!): SavingsAccount!
+  createTransaction(input: CreateTransactionInput!): Transaction!
+  forgotPassword(email: String!): BooleanResponse!
+  inviteMember(email: String!): Invitation!
+  login(email: String!, password: String!): AuthResponse!
+  registerWithInvite(password: String!, token: String!, username: String!): AuthResponse!
+  resetPassword(password: String!, token: String!): BooleanResponse!
+}
+
+type Query {
+  asset(id: ID!): Asset
+  farmCycle(id: ID!): FarmCycle
+  me: User!
+  myAssets: [Asset!]!
+  myCategories: [Category!]!
+  myFarmCycles(userId: ID!): [FarmCycle!]!
+  myHousehold: Household
+  mySavingsAccounts: [SavingsAccount!]!
+  myTransactions(sort: String, type: String): [Transaction!]!
+  transactionsByCycle(cycleId: ID!): [Transaction!]!
+  users: [User!]!
+}
+
+type SavingsAccount {
+  _id: ID!
+  accountName: String!
+  accountType: String!
+  balance: Float!
+  currency: String!
+  householdId: ID!
+}
+
+type Transaction {
+  _id: ID!
+  amount: Float!
+  assetId: ID
+  categoryId: ID!
+  date: DateTime!
+  description: String
+  farmCycleId: ID
+  householdId: ID!
+  isRecurring: Boolean!
+  savingsAccountId: ID
+  store: String
+  tags: [String!]!
+  type: String!
+}
+
+type User {
+  _id: ID!
+  email: String!
+  householdId: ID
+  role: String!
+  username: String!
+}

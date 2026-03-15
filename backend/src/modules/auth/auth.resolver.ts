@@ -4,7 +4,7 @@ import { User } from '../users/schemas/user.schema';
 
 @ObjectType()
 class AuthResponse {
-  @Field()
+  @Field(() => String)
   accessToken: string;
 
   @Field(() => User, { nullable: true })
@@ -13,7 +13,7 @@ class AuthResponse {
 
 @ObjectType()
 class BooleanResponse {
-  @Field()
+  @Field(() => Boolean)
   success: boolean;
 }
 
