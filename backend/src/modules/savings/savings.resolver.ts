@@ -13,7 +13,7 @@ export class SavingsResolver {
   @UseGuards(JwtAuthGuard)
   async createSavingsAccount(
     @Context('req') req: any,
-    @Args('input') input: CreateSavingsAccountInput,
+    @Args('input', { type: () => CreateSavingsAccountInput }) input: CreateSavingsAccountInput,
   ) {
     const householdId = req.user?.householdId;
     if (!householdId) throw new Error('User does not belong to a household');

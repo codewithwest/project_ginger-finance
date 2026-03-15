@@ -11,7 +11,7 @@ import {
 
 @InputType()
 export class CreateTransactionInput {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsString()
   description: string;
@@ -21,7 +21,7 @@ export class CreateTransactionInput {
   @IsNumber()
   amount: number;
 
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsEnum(['income', 'expense'])
   type: string;

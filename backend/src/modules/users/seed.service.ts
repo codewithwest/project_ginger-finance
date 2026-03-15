@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { MailService } from '../mail/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -9,8 +9,8 @@ export class SeedService implements OnModuleInit {
   private readonly logger = new Logger(SeedService.name);
 
   constructor(
-    private readonly usersService: UsersService,
-    private readonly mailService: MailService,
+    @Inject(UsersService) private readonly usersService: UsersService,
+    @Inject(MailService) private readonly mailService: MailService,
   ) {}
 
   async onModuleInit() {

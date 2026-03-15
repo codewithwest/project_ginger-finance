@@ -11,16 +11,16 @@ export class Budget {
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
   categoryId: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   limit: number;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   period: string; // e.g., 'monthly', 'yearly'
 
-  @Prop({ required: true })
+  @Prop({ type: Date, required: true })
   startDate: Date;
 
-  @Prop()
+  @Prop({ type: Date })
   endDate: Date;
 }
 

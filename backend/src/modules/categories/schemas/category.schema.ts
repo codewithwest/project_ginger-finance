@@ -14,16 +14,16 @@ export class Category {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   icon: string;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   color: string;
 }
 

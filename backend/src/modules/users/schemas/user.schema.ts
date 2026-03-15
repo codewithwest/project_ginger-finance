@@ -10,26 +10,30 @@ export class User {
   @Field(() => ID)
   _id: string;
 
-  @Field()
-  @Prop({ required: true, unique: true, minlength: 3 })
+  @Field(() => String)
+  @Prop({ type: String, required: true, unique: true, minlength: 3 })
   username: string;
 
-  @Field()
-  @Prop({ required: true, unique: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true, unique: true })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   passwordHash: string;
 
-  @Field()
-  @Prop({ default: 'MEMBER', enum: ['SUPER_ADMIN', 'ADMIN', 'MEMBER'] })
+  @Field(() => String)
+  @Prop({
+    type: String,
+    default: 'MEMBER',
+    enum: ['SUPER_ADMIN', 'ADMIN', 'MEMBER'],
+  })
   role: string;
 
   @Field(() => ID, { nullable: true })
   @Prop({ type: Types.ObjectId, ref: 'Household' })
   householdId?: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String })
   refreshToken: string;
 
   @Prop({ type: String, nullable: true })

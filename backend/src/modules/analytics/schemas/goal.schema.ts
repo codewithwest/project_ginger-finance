@@ -8,19 +8,19 @@ export class FinancialGoal {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Prop({ required: true })
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   targetAmount: number;
 
-  @Prop({ default: 0 })
+  @Prop({ type: Number, default: 0 })
   currentAmount: number;
 
-  @Prop()
+  @Prop({ type: Date })
   deadline: Date;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   isCompleted: boolean;
 }
 

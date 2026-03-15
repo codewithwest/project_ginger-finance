@@ -14,28 +14,28 @@ export class Asset {
   @Prop({ type: Types.ObjectId, ref: 'Household', required: true })
   householdId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   category: string;
 
   @Field(() => Float)
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   purchasePrice: number;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })
   purchaseDate: Date;
 
   @Field(() => Float)
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   currentValue: number;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   notes: string;
 
   @Field(() => [String])

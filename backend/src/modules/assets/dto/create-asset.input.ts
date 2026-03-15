@@ -9,12 +9,12 @@ import {
 
 @InputType()
 export class CreateAssetInput {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsString()
   category: string;
@@ -34,7 +34,7 @@ export class CreateAssetInput {
   @IsDate()
   purchaseDate: Date;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsString()
   notes?: string;

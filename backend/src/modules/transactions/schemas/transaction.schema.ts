@@ -14,8 +14,12 @@ export class Transaction {
   @Prop({ type: Types.ObjectId, ref: 'Household', required: true })
   householdId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true, enum: ['income', 'expense', 'savings'] })
+  @Field(() => String)
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['income', 'expense', 'savings'],
+  })
   type: string;
 
   @Field(() => ID)
@@ -23,23 +27,23 @@ export class Transaction {
   categoryId: Types.ObjectId;
 
   @Field(() => Float)
-  @Prop({ required: true })
+  @Prop({ type: Number, required: true })
   amount: number;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })
   date: Date;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   description: string;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   store: string;
 
-  @Field()
-  @Prop({ default: false })
+  @Field(() => Boolean)
+  @Prop({ type: Boolean, default: false })
   isRecurring: boolean;
 
   @Field(() => ID, { nullable: true })

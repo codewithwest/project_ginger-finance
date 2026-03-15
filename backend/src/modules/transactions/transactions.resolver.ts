@@ -16,7 +16,7 @@ export class TransactionsResolver {
   @Mutation(() => Transaction)
   @UseGuards(JwtAuthGuard)
   async createTransaction(
-    @Args('input') input: CreateTransactionInput,
+    @Args('input', { type: () => CreateTransactionInput }) input: CreateTransactionInput,
     @Context('req') req: any,
   ) {
     const householdId = req.user?.householdId;

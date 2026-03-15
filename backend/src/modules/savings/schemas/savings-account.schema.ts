@@ -14,20 +14,24 @@ export class SavingsAccount {
   @Prop({ type: Types.ObjectId, ref: 'Household', required: true })
   householdId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   accountName: string;
 
-  @Field()
-  @Prop({ required: true, enum: ['bank', 'investment', 'emergency', 'cash'] })
+  @Field(() => String)
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['bank', 'investment', 'emergency', 'cash'],
+  })
   accountType: string;
 
   @Field(() => Float)
-  @Prop({ required: true, default: 0 })
+  @Prop({ type: Number, required: true, default: 0 })
   balance: number;
 
-  @Field()
-  @Prop({ required: true, default: 'ZAR' })
+  @Field(() => String)
+  @Prop({ type: String, required: true, default: 'ZAR' })
   currency: string;
 }
 

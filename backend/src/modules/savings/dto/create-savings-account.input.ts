@@ -9,12 +9,12 @@ import {
 
 @InputType()
 export class CreateSavingsAccountInput {
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsString()
   accountName: string;
 
-  @Field()
+  @Field(() => String)
   @IsNotEmpty()
   @IsEnum(['bank', 'investment', 'emergency', 'cash'])
   accountType: string;
@@ -24,7 +24,7 @@ export class CreateSavingsAccountInput {
   @IsOptional()
   balance: number;
 
-  @Field({ defaultValue: 'ZAR' })
+  @Field(() => String, { defaultValue: 'ZAR' })
   @IsOptional()
   @IsString()
   currency: string;

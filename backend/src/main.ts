@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -11,11 +12,16 @@ export const bootstrap = async () => {
 
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
+  let allowedOrigins: string[] | string | undefined =
+    process.env.ALLOWED_ORIGINS;
+
+  if (typeof allowedOrigins === 'string') {
+    allowedOrigins = allowedOrigins.split(',');
+    console.log(allowedOrigins);
+  }
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      process.env.APP_URL,
-    ].filter(Boolean) as string[],
+    origin: [...(allowedOrigins ?? [])].filter(Boolean),
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization',
@@ -23,6 +29,7 @@ export const bootstrap = async () => {
 
   await app.init();
   isAppInitialized = true;
+  console.log('server', server);
   return server;
 };
 

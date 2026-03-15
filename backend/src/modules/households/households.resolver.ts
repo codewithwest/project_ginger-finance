@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Query, Args, Context } from '@nestjs/graphql';
+import { Resolver, Mutation, Query, Args } from '@nestjs/graphql';
 import { UseGuards, ForbiddenException } from '@nestjs/common';
 import { HouseholdsService } from './households.service';
 import { Household } from './schemas/household.schema';
@@ -23,8 +23,8 @@ export class HouseholdsResolver {
   @Mutation(() => Invitation)
   @UseGuards(JwtAuthGuard)
   async createHouseholdAndAdminInvite(
-    @Args('name') name: string,
-    @Args('adminEmail') adminEmail: string,
+    @Args('name', { type: () => String }) name: string,
+    @Args('adminEmail', { type: () => String }) adminEmail: string,
     @CurrentUser() user: JwtUser,
   ) {
     if (user.role !== 'SUPER_ADMIN') {
@@ -42,7 +42,7 @@ export class HouseholdsResolver {
   @Mutation(() => Invitation)
   @UseGuards(JwtAuthGuard)
   async inviteMember(
-    @Args('email') email: string,
+    @Args('email', { type: () => String }) email: string,
     @CurrentUser() user: JwtUser,
   ) {
     if (user.role !== 'ADMIN' && user.role !== 'SUPER_ADMIN') {

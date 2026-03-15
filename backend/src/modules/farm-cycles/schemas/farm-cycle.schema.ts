@@ -14,28 +14,28 @@ export class FarmCycle {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   name: string;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   cropType: string;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => Date)
+  @Prop({ type: Date, required: true })
   startDate: Date;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => Date, { nullable: true })
+  @Prop({ type: Date })
   expectedHarvestDate: Date;
 
-  @Field({ nullable: true })
-  @Prop()
+  @Field(() => String, { nullable: true })
+  @Prop({ type: String })
   notes: string;
 
-  @Field()
-  @Prop({ default: false })
+  @Field(() => Boolean)
+  @Prop({ type: Boolean, default: false })
   isCompleted: boolean;
 }
 

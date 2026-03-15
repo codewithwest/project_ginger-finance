@@ -12,7 +12,7 @@ import { MailModule } from '../mail/mail.module';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MailModule,
   ],
-  providers: [UsersService, UsersResolver, SeedService],
+  providers: [UsersService, SeedService, UsersResolver],
   controllers: [UsersController],
   exports: [UsersService],
 })

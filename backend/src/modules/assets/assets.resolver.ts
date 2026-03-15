@@ -13,7 +13,7 @@ export class AssetsResolver {
   @UseGuards(JwtAuthGuard)
   async createAsset(
     @Context('req') req: any,
-    @Args('input') input: CreateAssetInput,
+    @Args('input', { type: () => CreateAssetInput }) input: CreateAssetInput,
   ) {
     const householdId = req.user?.householdId;
     if (!householdId) throw new Error('User does not belong to a household');

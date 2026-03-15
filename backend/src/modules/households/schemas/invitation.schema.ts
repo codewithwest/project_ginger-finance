@@ -10,30 +10,35 @@ export class Invitation {
   @Field(() => ID)
   _id: string;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   email: string;
 
   @Field(() => ID)
   @Prop({ type: Types.ObjectId, ref: 'Household', required: true })
   householdId: Types.ObjectId;
 
-  @Field()
-  @Prop({ required: true, unique: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true, unique: true })
   token: string;
 
-  @Field()
-  @Prop({ required: true, enum: ['ADMIN', 'MEMBER'] })
+  @Field(() => String)
+  @Prop({ type: String, required: true, enum: ['ADMIN', 'MEMBER'] })
   role: string;
 
-  @Field()
-  @Prop({ required: true, enum: ['pending', 'used'], default: 'pending' })
+  @Field(() => String)
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['pending', 'used'],
+    default: 'pending',
+  })
   status: string;
 
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 
-  @Field()
+  @Field(() => Date)
   updatedAt: Date;
 }
 

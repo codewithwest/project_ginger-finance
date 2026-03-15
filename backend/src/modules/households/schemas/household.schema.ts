@@ -11,18 +11,18 @@ export class Household {
   @Field(() => ID)
   _id: string;
 
-  @Field()
-  @Prop({ required: true })
+  @Field(() => String)
+  @Prop({ type: String, required: true })
   name: string;
 
   @Field(() => [User])
   @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }] })
   members: User[];
 
-  @Field()
+  @Field(() => Date)
   createdAt: Date;
 
-  @Field()
+  @Field(() => Date)
   updatedAt: Date;
 }
 

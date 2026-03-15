@@ -23,8 +23,8 @@ export class AuthResolver {
 
   @Mutation(() => AuthResponse)
   async login(
-    @Args('email') email: string,
-    @Args('password') password: string,
+    @Args('email', { type: () => String }) email: string,
+    @Args('password', { type: () => String }) password: string,
   ) {
     const user = await this.authService.validateUser(email, password);
     if (!user) throw new Error('Invalid credentials');
@@ -33,23 +33,23 @@ export class AuthResolver {
 
   @Mutation(() => AuthResponse)
   async registerWithInvite(
-    @Args('token') token: string,
-    @Args('username') username: string,
-    @Args('password') password: string,
+    @Args('token', { type: () => String }) token: string,
+    @Args('username', { type: () => String }) username: string,
+    @Args('password', { type: () => String }) password: string,
   ) {
     return this.authService.registerWithInvite(token, username, password);
   }
 
   @Mutation(() => BooleanResponse)
-  async forgotPassword(@Args('email') email: string) {
+  async forgotPassword(@Args('email', { type: () => String }) email: string) {
     await this.authService.forgotPassword(email);
     return { success: true }; // always true to avoid user enumeration
   }
 
   @Mutation(() => BooleanResponse)
   async resetPassword(
-    @Args('token') token: string,
-    @Args('password') password: string,
+    @Args('token', { type: () => String }) token: string,
+    @Args('password', { type: () => String }) password: string,
   ) {
     const success = await this.authService.resetPassword(token, password);
     return { success };
