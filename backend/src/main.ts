@@ -17,6 +17,7 @@ export const bootstrap = async () => {
 
   if (typeof allowedOrigins === 'string') {
     allowedOrigins = allowedOrigins.split(',');
+    
     console.log(allowedOrigins);
   }
 
