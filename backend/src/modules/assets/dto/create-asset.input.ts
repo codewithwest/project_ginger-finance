@@ -38,4 +38,28 @@ export class CreateAssetInput {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @Field(() => Boolean, { nullable: true })
+  @IsOptional()
+  hasLoan?: boolean;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  loanBalance?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  loanTerm?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  monthlyPayment?: number;
+
+  @Field(() => Float, { nullable: true })
+  @IsOptional()
+  @IsNumber()
+  interestRate?: number;
 }

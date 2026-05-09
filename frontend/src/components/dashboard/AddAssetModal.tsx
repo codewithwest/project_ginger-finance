@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { X, ChevronDown } from 'lucide-react';
-import { graphqlFetch } from '@/lib/graphql';
+import React, { useState } from "react";
+import { X, ChevronDown } from "lucide-react";
+import { graphqlFetch } from "@/lib/graphql";
 
 interface AddAssetModalProps {
   isOpen: boolean;
@@ -11,26 +11,35 @@ interface AddAssetModalProps {
   userId: string;
 }
 
-const CATEGORIES = ['Land', 'Vehicle', 'Livestock', 'Equipment', 'Other'];
+const CATEGORIES = ["Land", "Vehicle", "Livestock", "Equipment", "Other"];
 
-export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAssetModalProps, 'userId'>) {
+export default function AddAssetModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: Omit<AddAssetModalProps, "userId">) {
   const [formData, setFormData] = useState({
-    name: '',
-    category: 'Land',
-    purchasePrice: '',
-    currentValue: '',
-    purchaseDate: new Date().toISOString().split('T')[0],
+    name: "",
+    category: "Land",
+    purchasePrice: "",
+    currentValue: "",
+    purchaseDate: new Date().toISOString().split("T")[0],
+    hasLoan: false,
+    loanBalance: "",
+    loanTerm: "",
+    monthlyPayment: "",
+    interestRate: "",
   });
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   if (!isOpen) return null;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     const mutation = `
       mutation CreateAsset($input: CreateAssetInput!) {
@@ -51,6 +60,17 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
             purchasePrice: parseFloat(formData.purchasePrice),
             currentValue: parseFloat(formData.currentValue),
             purchaseDate: new Date(formData.purchaseDate).toISOString(),
+            hasLoan: formData.hasLoan,
+            loanBalance: formData.hasLoan
+              ? parseFloat(formData.loanBalance)
+              : null,
+            loanTerm: formData.hasLoan ? parseFloat(formData.loanTerm) : null,
+            monthlyPayment: formData.hasLoan
+              ? parseFloat(formData.monthlyPayment)
+              : null,
+            interestRate: formData.hasLoan
+              ? parseFloat(formData.interestRate)
+              : null,
           },
         },
       });
@@ -62,7 +82,7 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
       onSuccess();
       onClose();
     } catch (err: any) {
-      setError(err.message || 'Failed to add asset');
+      setError(err.message || "Failed to add asset");
     } finally {
       setLoading(false);
     }
@@ -70,15 +90,23 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
 
   return (
     <div className="modal-overlay">
-      <div className="glass-card modal-content" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
+      <div
+        className="glass-card modal-content"
+        style={{ maxWidth: "500px", width: "90%", padding: "2rem" }}
+      >
         <div className="modal-header">
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Add New Asset</h2>
-          <button onClick={onClose} className="btn-ghost-sm"><X size={20} /></button>
+          <h2 style={{ fontSize: "1.5rem", fontWeight: 700 }}>Add New Asset</h2>
+          <button onClick={onClose} className="btn-ghost-sm">
+            <X size={20} />
+          </button>
         </div>
 
         {error && <div className="error-banner">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}
+        >
           <div className="form-group">
             <label className="form-label">Asset Name</label>
             <input
@@ -87,14 +115,16 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
               required
               placeholder="e.g. John Deere Tractor"
               value={formData.name}
-              onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, name: event.target.value })
+              }
             />
           </div>
 
-          <div className="form-group" style={{ position: 'relative' }}>
+          <div className="form-group" style={{ position: "relative" }}>
             <label className="form-label">Category</label>
-            <div 
-              className="custom-select-trigger" 
+            <div
+              className="custom-select-trigger"
               onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
             >
               <span>{formData.category}</span>
@@ -102,12 +132,12 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
             </div>
             {isCategoryDropdownOpen && (
               <div className="custom-dropdown-menu">
-                {CATEGORIES.map(cat => (
-                  <div 
-                    key={cat} 
+                {CATEGORIES.map((cat) => (
+                  <div
+                    key={cat}
                     className="dropdown-item"
                     onClick={() => {
-                      setFormData({...formData, category: cat});
+                      setFormData({ ...formData, category: cat });
                       setIsCategoryDropdownOpen(false);
                     }}
                   >
@@ -118,7 +148,13 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "1rem",
+            }}
+          >
             <div className="form-group">
               <label className="form-label">Purchase Price (R)</label>
               <input
@@ -126,7 +162,12 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
                 className="form-input"
                 required
                 value={formData.purchasePrice}
-                onChange={(event) => setFormData({ ...formData, purchasePrice: event.target.value })}
+                onChange={(event) =>
+                  setFormData({
+                    ...formData,
+                    purchasePrice: event.target.value,
+                  })
+                }
               />
             </div>
             <div className="form-group">
@@ -136,7 +177,9 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
                 className="form-input"
                 required
                 value={formData.currentValue}
-                onChange={(event) => setFormData({ ...formData, currentValue: event.target.value })}
+                onChange={(event) =>
+                  setFormData({ ...formData, currentValue: event.target.value })
+                }
               />
             </div>
           </div>
@@ -148,12 +191,115 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
               className="form-input"
               required
               value={formData.purchaseDate}
-              onChange={(event) => setFormData({ ...formData, purchaseDate: event.target.value })}
+              onChange={(event) =>
+                setFormData({ ...formData, purchaseDate: event.target.value })
+              }
             />
           </div>
 
-          <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
-            {loading ? 'Adding...' : 'Add Asset'}
+          <div
+            className="form-group"
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginTop: "0.5rem",
+            }}
+          >
+            <input
+              type="checkbox"
+              id="hasLoan"
+              checked={formData.hasLoan}
+              onChange={(e) =>
+                setFormData({ ...formData, hasLoan: e.target.checked })
+              }
+              style={{ width: "1.2rem", height: "1.2rem", cursor: "pointer" }}
+            />
+            <label
+              htmlFor="hasLoan"
+              className="form-label"
+              style={{ margin: 0 }}
+            >
+              Has Loan?
+            </label>
+          </div>
+
+          {formData.hasLoan && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "1rem",
+                marginTop: "0.5rem",
+              }}
+            >
+              <div className="form-group">
+                <label className="form-label">Loan Balance (R)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  required
+                  value={formData.loanBalance}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      loanBalance: event.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Loan Term (Months)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  required
+                  value={formData.loanTerm}
+                  onChange={(event) =>
+                    setFormData({ ...formData, loanTerm: event.target.value })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Monthly Payment (R)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  required
+                  value={formData.monthlyPayment}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      monthlyPayment: event.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Interest Rate (%)</label>
+                <input
+                  type="number"
+                  className="form-input"
+                  required
+                  value={formData.interestRate}
+                  onChange={(event) =>
+                    setFormData({
+                      ...formData,
+                      interestRate: event.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={loading}
+            style={{ marginTop: "1rem" }}
+          >
+            {loading ? "Adding..." : "Add Asset"}
           </button>
         </form>
       </div>
@@ -161,8 +307,11 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
       <style jsx>{`
         .modal-overlay {
           position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.6);
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0, 0, 0, 0.6);
           backdrop-filter: blur(8px);
           display: flex;
           align-items: center;
@@ -207,13 +356,14 @@ export default function AddAssetModal({ isOpen, onClose, onSuccess }: Omit<AddAs
         .custom-dropdown-menu {
           position: absolute;
           top: calc(100% + 5px);
-          left: 0; right: 0;
+          left: 0;
+          right: 0;
           background: var(--color-bg-secondary);
           border: 1px solid var(--color-border);
           border-radius: 12px;
           z-index: 10;
           padding: 0.5rem;
-          box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
         }
         .dropdown-item {
           padding: 0.75rem 1rem;

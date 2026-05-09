@@ -1,4 +1,14 @@
-import { Resolver, Query, Mutation, Args, ID, Context } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ID,
+  Context,
+  ObjectType,
+  Field,
+  Float,
+} from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './schemas/transaction.schema';
@@ -9,6 +19,21 @@ interface GqlContext {
   req: { user: { householdId: string } };
 }
 
+@ObjectType()
+export class MonthlySummary {
+  @Field(() => Float)
+  income: number;
+
+  @Field(() => Float)
+  expenses: number;
+
+  @Field(() => Float)
+  savings: number;
+
+  @Field(() => Float)
+  balance: number;
+}
+
 @Resolver(() => Transaction)
 export class TransactionsResolver {
   constructor(private readonly transactionsService: TransactionsService) {}
@@ -16,7 +41,8 @@ export class TransactionsResolver {
   @Mutation(() => Transaction)
   @UseGuards(JwtAuthGuard)
   async createTransaction(
-    @Args('input', { type: () => CreateTransactionInput }) input: CreateTransactionInput,
+    @Args('input', { type: () => CreateTransactionInput })
+    input: CreateTransactionInput,
     @Context('req') req: any,
   ) {
     const householdId = req.user?.householdId;
@@ -30,10 +56,17 @@ export class TransactionsResolver {
     @Context('req') req: any,
     @Args('type', { type: () => String, nullable: true }) type?: string,
     @Args('sort', { type: () => String, nullable: true }) sort?: string,
+    @Args('month', { type: () => Number, nullable: true }) month?: number,
+    @Args('year', { type: () => Number, nullable: true }) year?: number,
   ) {
     const householdId = req.user?.householdId;
     if (!householdId) return [];
-    return this.transactionsService.findAll(householdId, { type, sort });
+    return this.transactionsService.findAll(householdId, {
+      type,
+      sort,
+      month,
+      year,
+    });
   }
 
   @Query(() => [Transaction])
@@ -42,5 +75,17 @@ export class TransactionsResolver {
     @Args('cycleId', { type: () => ID }) cycleId: string,
   ) {
     return this.transactionsService.findAllByCycle(cycleId);
+  }
+
+  @Query(() => MonthlySummary)
+  @UseGuards(JwtAuthGuard)
+  async monthlySummary(
+    @Context('req') req: any,
+    @Args('month', { type: () => Number }) month: number,
+    @Args('year', { type: () => Number }) year: number,
+  ) {
+    const householdId = req.user?.householdId;
+    if (!householdId) throw new Error('User does not belong to a household');
+    return this.transactionsService.getMonthlySummary(householdId, month, year);
   }
 }

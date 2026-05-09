@@ -38,6 +38,26 @@ export class Asset {
   @Prop({ type: String })
   notes: string;
 
+  @Field(() => Boolean, { defaultValue: false })
+  @Prop({ type: Boolean, default: false })
+  hasLoan: boolean;
+
+  @Field(() => Float, { nullable: true })
+  @Prop({ type: Number })
+  loanBalance: number;
+
+  @Field(() => Float, { nullable: true })
+  @Prop({ type: Number })
+  loanTerm: number; // in months
+
+  @Field(() => Float, { nullable: true })
+  @Prop({ type: Number })
+  monthlyPayment: number;
+
+  @Field(() => Float, { nullable: true })
+  @Prop({ type: Number })
+  interestRate: number;
+
   @Field(() => [String])
   @Prop([String])
   attachments: string[];

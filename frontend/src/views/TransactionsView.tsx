@@ -1,12 +1,21 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { graphqlFetch } from '@/lib/graphql';
-import { Filter, SortDesc, Search, ChevronDown, Receipt, ArrowUpRight, ArrowDownRight, Tag } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { graphqlFetch } from "@/lib/graphql";
+import {
+  Filter,
+  SortDesc,
+  Search,
+  ChevronDown,
+  Receipt,
+  ArrowUpRight,
+  ArrowDownRight,
+  Tag,
+} from "lucide-react";
 
 interface Transaction {
   _id: string;
-  type: 'income' | 'expense' | 'savings';
+  type: "income" | "expense" | "savings";
   amount: number;
   date: string;
   description: string;
@@ -20,10 +29,18 @@ interface Category {
 
 export default function TransactionsView() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [summary, setSummary] = useState<{
+    income: number;
+    expenses: number;
+    savings: number;
+    balance: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [filterType, setFilterType] = useState<string>('');
-  const [sortOrder, setSortOrder] = useState<string>('date_desc');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<string>("date_desc");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 
@@ -31,8 +48,8 @@ export default function TransactionsView() {
     setLoading(true);
     try {
       const query = `
-        query GetTransactionsData($type: String, $sort: String) {
-          myTransactions(type: $type, sort: $sort) {
+        query GetTransactionsData($type: String, $sort: String, $month: Int, $year: Int) {
+          myTransactions(type: $type, sort: $sort, month: $month, year: $year) {
             _id
             description
             amount
@@ -40,102 +57,267 @@ export default function TransactionsView() {
             date
             tags
           }
-          myCategories {
-            _id
-            name
+          monthlySummary(month: $month, year: $year) {
+            income
+            expenses
+            savings
+            balance
           }
         }
       `;
-      const result = await graphqlFetch<{ myTransactions: Transaction[], myCategories: Category[] }>({
+      const result = await graphqlFetch<{
+        myTransactions: Transaction[];
+        monthlySummary: any;
+      }>({
         query,
-        variables: { type: filterType || undefined, sort: sortOrder },
+        variables: {
+          type: filterType || undefined,
+          sort: sortOrder,
+          month: selectedMonth,
+          year: selectedYear,
+        },
       });
       if (result.data) {
         setTransactions(result.data.myTransactions || []);
+        setSummary(result.data.monthlySummary);
       }
     } catch (err) {
-      console.error('Failed to fetch transactions:', err);
+      console.error("Failed to fetch transactions:", err);
     } finally {
       setLoading(false);
     }
-  }, [filterType, sortOrder]);
+  }, [filterType, sortOrder, selectedMonth, selectedYear]);
 
   useEffect(() => {
     fetchTransactions();
   }, [fetchTransactions]);
 
-  const filteredTransactions = transactions.filter(transaction => 
-    transaction.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    transaction.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredTransactions = transactions.filter(
+    (transaction) =>
+      transaction.description
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      transaction.tags.some((tag) =>
+        tag.toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
   );
 
-  if (loading && transactions.length === 0) return (
-    <div className="loader-container">
-      <div className="loader-3d"></div>
-    </div>
-  );
+  if (loading && transactions.length === 0)
+    return (
+      <div className="loader-container">
+        <div className="loader-3d"></div>
+      </div>
+    );
 
   return (
     <div className="view-container">
       <header className="view-header">
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h2
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
+          >
             <Receipt className="gradient-text" size={32} />
             Transaction History
           </h2>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>Chronological record of all household cash flows.</p>
+          <p style={{ color: "var(--color-text-muted)", marginTop: "0.25rem" }}>
+            Chronological record of all household cash flows.
+          </p>
         </div>
-        
+
         <div className="view-actions">
           <div className="search-bar-premium">
             <Search size={18} color="var(--color-text-muted)" />
-            <input 
-              type="text" 
-              placeholder="Search by description or tag..." 
+            <input
+              type="text"
+              placeholder="Search by description or tag..."
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
             />
+          </div>
+
+          <div
+            className="date-selector-premium"
+            style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}
+          >
+            <select
+              className="custom-select-trigger"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+              style={{ padding: "0.6rem 1rem", cursor: "pointer" }}
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i}>
+                  {new Date(2000, i).toLocaleString("default", {
+                    month: "long",
+                  })}
+                </option>
+              ))}
+            </select>
+            <select
+              className="custom-select-trigger"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              style={{ padding: "0.6rem 1rem", cursor: "pointer" }}
+            >
+              {Array.from({ length: 10 }, (_, i) => (
+                <option key={2020 + i} value={2020 + i}>
+                  {2020 + i}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </header>
 
       <div className="filters-row-premium">
         <div className="dropdown-wrapper">
-          <div 
-            className={`custom-select-trigger ${filterType ? 'active' : ''}`} 
+          <div
+            className={`custom-select-trigger ${filterType ? "active" : ""}`}
             onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
           >
             <Filter size={16} />
-            <span>{filterType ? filterType.charAt(0).toUpperCase() + filterType.slice(1) : 'All Types'}</span>
-            <ChevronDown size={14} className={isTypeDropdownOpen ? 'rotate' : ''} />
+            <span>
+              {filterType
+                ? filterType.charAt(0).toUpperCase() + filterType.slice(1)
+                : "All Types"}
+            </span>
+            <ChevronDown
+              size={14}
+              className={isTypeDropdownOpen ? "rotate" : ""}
+            />
           </div>
           {isTypeDropdownOpen && (
             <div className="glass-card custom-dropdown-menu">
-              <div className="dropdown-item" onClick={() => { setFilterType(''); setIsTypeDropdownOpen(false); }}>All Types</div>
-              <div className="dropdown-item" onClick={() => { setFilterType('income'); setIsTypeDropdownOpen(false); }}>Income</div>
-              <div className="dropdown-item" onClick={() => { setFilterType('expense'); setIsTypeDropdownOpen(false); }}>Expense</div>
-              <div className="dropdown-item" onClick={() => { setFilterType('savings'); setIsTypeDropdownOpen(false); }}>Savings</div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setFilterType("");
+                  setIsTypeDropdownOpen(false);
+                }}
+              >
+                All Types
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setFilterType("income");
+                  setIsTypeDropdownOpen(false);
+                }}
+              >
+                Income
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setFilterType("expense");
+                  setIsTypeDropdownOpen(false);
+                }}
+              >
+                Expense
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setFilterType("savings");
+                  setIsTypeDropdownOpen(false);
+                }}
+              >
+                Savings
+              </div>
             </div>
           )}
         </div>
 
         <div className="dropdown-wrapper">
-          <div 
-            className="custom-select-trigger" 
+          <div
+            className="custom-select-trigger"
             onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
           >
             <SortDesc size={16} />
-            <span>{sortOrder === 'date_desc' ? 'Newest First' : 'Oldest First'}</span>
-            <ChevronDown size={14} className={isSortDropdownOpen ? 'rotate' : ''} />
+            <span>
+              {sortOrder === "date_desc" ? "Newest First" : "Oldest First"}
+            </span>
+            <ChevronDown
+              size={14}
+              className={isSortDropdownOpen ? "rotate" : ""}
+            />
           </div>
           {isSortDropdownOpen && (
             <div className="glass-card custom-dropdown-menu">
-              <div className="dropdown-item" onClick={() => { setSortOrder('date_desc'); setIsSortDropdownOpen(false); }}>Newest First</div>
-              <div className="dropdown-item" onClick={() => { setSortOrder('date_asc'); setIsSortDropdownOpen(false); }}>Oldest First</div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setSortOrder("date_desc");
+                  setIsSortDropdownOpen(false);
+                }}
+              >
+                Newest First
+              </div>
+              <div
+                className="dropdown-item"
+                onClick={() => {
+                  setSortOrder("date_asc");
+                  setIsSortDropdownOpen(false);
+                }}
+              >
+                Oldest First
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {summary && (
+        <div
+          className="summary-grid-premium"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(4, 1fr)",
+            gap: "1rem",
+            marginBottom: "2rem",
+          }}
+        >
+          <div className="glass-card stat-card">
+            <div className="stat-label">Income</div>
+            <div
+              className="stat-value"
+              style={{ color: "var(--color-income)" }}
+            >
+              R {summary.income.toLocaleString()}
+            </div>
+          </div>
+          <div className="glass-card stat-card">
+            <div className="stat-label">Expenses</div>
+            <div
+              className="stat-value"
+              style={{ color: "var(--color-expense)" }}
+            >
+              R {summary.expenses.toLocaleString()}
+            </div>
+          </div>
+          <div className="glass-card stat-card">
+            <div className="stat-label">Savings</div>
+            <div
+              className="stat-value"
+              style={{ color: "var(--color-accent-primary)" }}
+            >
+              R {summary.savings.toLocaleString()}
+            </div>
+          </div>
+          <div className="glass-card stat-card">
+            <div className="stat-label">Net Balance</div>
+            <div className="stat-value">
+              R {summary.balance.toLocaleString()}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="glass-card table-wrapper-premium">
         <table className="premium-table">
@@ -145,22 +327,28 @@ export default function TransactionsView() {
               <th>Description & Tags</th>
               <th>Category</th>
               <th>Date</th>
-              <th style={{ textAlign: 'right' }}>Amount</th>
+              <th style={{ textAlign: "right" }}>Amount</th>
             </tr>
           </thead>
           <tbody>
             {filteredTransactions.map((transaction) => (
               <tr key={transaction._id} className="premium-row">
-                <td style={{ width: '80px' }}>
+                <td style={{ width: "80px" }}>
                   <div className={`status-icon-box ${transaction.type}`}>
-                    {transaction.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+                    {transaction.type === "income" ? (
+                      <ArrowUpRight size={18} />
+                    ) : (
+                      <ArrowDownRight size={18} />
+                    )}
                   </div>
                 </td>
                 <td>
                   <div className="desc-content">
-                    <span className="primary-desc">{transaction.description}</span>
+                    <span className="primary-desc">
+                      {transaction.description}
+                    </span>
                     <div className="tags-container">
-                      {transaction.tags.map(tag => (
+                      {transaction.tags.map((tag) => (
                         <span key={tag} className="tag-badge">
                           <Tag size={10} />
                           {tag}
@@ -170,14 +358,19 @@ export default function TransactionsView() {
                   </div>
                 </td>
                 <td>
-                  <span className="category-text">{transaction.tags[0] || 'Uncategorized'}</span>
+                  <span className="category-text">
+                    {transaction.tags[0] || "Uncategorized"}
+                  </span>
                 </td>
                 <td>
-                  <span className="date-text">{new Date(transaction.date).toLocaleDateString()}</span>
+                  <span className="date-text">
+                    {new Date(transaction.date).toLocaleDateString()}
+                  </span>
                 </td>
-                <td style={{ textAlign: 'right' }}>
+                <td style={{ textAlign: "right" }}>
                   <span className={`amount-text ${transaction.type}`}>
-                    {transaction.type === 'income' ? '+' : '-'} R {transaction.amount.toLocaleString()}
+                    {transaction.type === "income" ? "+" : "-"} R{" "}
+                    {transaction.amount.toLocaleString()}
                   </span>
                 </td>
               </tr>
@@ -185,7 +378,10 @@ export default function TransactionsView() {
             {filteredTransactions.length === 0 && !loading && (
               <tr>
                 <td colSpan={5} className="empty-table-cell">
-                  <Receipt size={48} style={{ opacity: 0.1, marginBottom: '1rem' }} />
+                  <Receipt
+                    size={48}
+                    style={{ opacity: 0.1, marginBottom: "1rem" }}
+                  />
                   <p>No transactions match your current filters.</p>
                 </td>
               </tr>
@@ -210,7 +406,9 @@ export default function TransactionsView() {
           align-items: center;
           gap: 1rem;
           width: 350px;
-          transition: border-color 0.2s, box-shadow 0.2s;
+          transition:
+            border-color 0.2s,
+            box-shadow 0.2s;
         }
 
         .search-bar-premium:focus-within {
@@ -276,8 +474,14 @@ export default function TransactionsView() {
         }
 
         @keyframes slideDown {
-          from { transform: translateY(-10px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+          from {
+            transform: translateY(-10px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
         }
 
         .dropdown-item {
@@ -337,9 +541,18 @@ export default function TransactionsView() {
           justify-content: center;
         }
 
-        .status-icon-box.income { background: rgba(104, 211, 145, 0.1); color: var(--color-income); }
-        .status-icon-box.expense { background: rgba(252, 129, 129, 0.1); color: var(--color-expense); }
-        .status-icon-box.savings { background: rgba(79, 163, 224, 0.1); color: var(--color-accent-primary); }
+        .status-icon-box.income {
+          background: rgba(104, 211, 145, 0.1);
+          color: var(--color-income);
+        }
+        .status-icon-box.expense {
+          background: rgba(252, 129, 129, 0.1);
+          color: var(--color-expense);
+        }
+        .status-icon-box.savings {
+          background: rgba(79, 163, 224, 0.1);
+          color: var(--color-accent-primary);
+        }
 
         .desc-content {
           display: flex;
@@ -389,9 +602,16 @@ export default function TransactionsView() {
           font-weight: 800;
         }
 
-        .amount-text.income { color: var(--color-income); }
-        .amount-text.expense { color: var(--color-expense); color: #ff6b6b; }
-        .amount-text.savings { color: var(--color-accent-primary); }
+        .amount-text.income {
+          color: var(--color-income);
+        }
+        .amount-text.expense {
+          color: var(--color-expense);
+          color: #ff6b6b;
+        }
+        .amount-text.savings {
+          color: var(--color-accent-primary);
+        }
 
         .empty-table-cell {
           padding: 6rem 2rem;

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { graphqlFetch } from '@/lib/graphql';
-import { Landmark, TrendingUp, Plus, Briefcase, Activity } from 'lucide-react';
-import AddAssetModal from '@/components/dashboard/AddAssetModal';
+import React, { useState, useEffect } from "react";
+import { graphqlFetch } from "@/lib/graphql";
+import { Landmark, TrendingUp, Plus, Briefcase, Activity } from "lucide-react";
+import AddAssetModal from "@/components/dashboard/AddAssetModal";
 
 interface Asset {
   _id: string;
@@ -12,12 +12,18 @@ interface Asset {
   purchasePrice: number;
   currentValue: number;
   purchaseDate: string;
+  hasLoan: boolean;
+  loanBalance?: number;
+  loanTerm?: number;
+  monthlyPayment?: number;
+  interestRate?: number;
 }
 
 export default function AssetsView() {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
 
   const fetchAssets = React.useCallback(async () => {
     setLoading(true);
@@ -31,6 +37,11 @@ export default function AssetsView() {
             purchasePrice
             currentValue
             purchaseDate
+            hasLoan
+            loanBalance
+            loanTerm
+            monthlyPayment
+            interestRate
           }
         }
       `;
@@ -41,7 +52,7 @@ export default function AssetsView() {
         setAssets(result.data.myAssets);
       }
     } catch (err) {
-      console.error('Failed to fetch assets:', err);
+      console.error("Failed to fetch assets:", err);
     } finally {
       setLoading(false);
     }
@@ -52,23 +63,37 @@ export default function AssetsView() {
   }, [fetchAssets]);
 
   const totalValue = assets.reduce((sum, asset) => sum + asset.currentValue, 0);
-  const totalGrowth = assets.reduce((sum, asset) => sum + (asset.currentValue - asset.purchasePrice), 0);
-
-  if (loading) return (
-    <div className="loader-container">
-      <div className="loader-3d"></div>
-    </div>
+  const totalGrowth = assets.reduce(
+    (sum, asset) => sum + (asset.currentValue - asset.purchasePrice),
+    0,
   );
+
+  if (loading)
+    return (
+      <div className="loader-container">
+        <div className="loader-3d"></div>
+      </div>
+    );
 
   return (
     <div className="view-container">
       <header className="view-header">
         <div>
-          <h2 style={{ fontSize: '1.75rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <h2
+            style={{
+              fontSize: "1.75rem",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.75rem",
+            }}
+          >
             <Landmark className="gradient-text" size={32} />
             Farm Assets
           </h2>
-          <p style={{ color: 'var(--color-text-muted)', marginTop: '0.25rem' }}>Inventory and valuation of your agricultural holdings.</p>
+          <p style={{ color: "var(--color-text-muted)", marginTop: "0.25rem" }}>
+            Inventory and valuation of your agricultural holdings.
+          </p>
         </div>
         <button className="btn-primary" onClick={() => setIsModalOpen(true)}>
           <Plus size={18} />
@@ -76,15 +101,27 @@ export default function AssetsView() {
         </button>
       </header>
 
-      <AddAssetModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <AddAssetModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={fetchAssets}
       />
 
+      {editingAsset && (
+        <AddAssetModal
+          isOpen={!!editingAsset}
+          onClose={() => setEditingAsset(null)}
+          onSuccess={fetchAssets}
+          initialData={editingAsset}
+        />
+      )}
+
       <div className="stats-grid">
         <div className="glass-card stat-card">
-          <div className="stat-icon" style={{ background: 'rgba(79, 163, 224, 0.15)' }}>
+          <div
+            className="stat-icon"
+            style={{ background: "rgba(79, 163, 224, 0.15)" }}
+          >
             <Briefcase size={24} color="#4fa3e0" />
           </div>
           <div className="stat-info">
@@ -93,13 +130,32 @@ export default function AssetsView() {
           </div>
         </div>
         <div className="glass-card stat-card">
-          <div className="stat-icon" style={{ background: totalGrowth >= 0 ? 'rgba(72, 187, 120, 0.15)' : 'rgba(252, 129, 129, 0.15)' }}>
-            <Activity size={24} color={totalGrowth >= 0 ? '#48bb78' : '#fc8181'} />
+          <div
+            className="stat-icon"
+            style={{
+              background:
+                totalGrowth >= 0
+                  ? "rgba(72, 187, 120, 0.15)"
+                  : "rgba(252, 129, 129, 0.15)",
+            }}
+          >
+            <Activity
+              size={24}
+              color={totalGrowth >= 0 ? "#48bb78" : "#fc8181"}
+            />
           </div>
           <div className="stat-info">
             <span className="stat-label">Net Unrealized Growth</span>
-            <span className="stat-value" style={{ color: totalGrowth >= 0 ? 'var(--color-income)' : 'var(--color-expense)' }}>
-              {totalGrowth >= 0 ? '+' : ''} R {totalGrowth.toLocaleString()}
+            <span
+              className="stat-value"
+              style={{
+                color:
+                  totalGrowth >= 0
+                    ? "var(--color-income)"
+                    : "var(--color-expense)",
+              }}
+            >
+              {totalGrowth >= 0 ? "+" : ""} R {totalGrowth.toLocaleString()}
             </span>
           </div>
         </div>
@@ -110,36 +166,105 @@ export default function AssetsView() {
           <div key={asset._id} className="glass-card asset-card-premium">
             <div className="card-top">
               <div className="category-pill">{asset.category}</div>
-              <div className="growth-badge" style={{ color: asset.currentValue >= asset.purchasePrice ? 'var(--color-income)' : 'var(--color-expense)' }}>
+              <div
+                className="growth-badge"
+                style={{
+                  color:
+                    asset.currentValue >= asset.purchasePrice
+                      ? "var(--color-income)"
+                      : "var(--color-expense)",
+                }}
+              >
                 <TrendingUp size={14} />
-                {((asset.currentValue - asset.purchasePrice) / (asset.purchasePrice || 1) * 100).toFixed(1)}%
+                {(
+                  ((asset.currentValue - asset.purchasePrice) /
+                    (asset.purchasePrice || 1)) *
+                  100
+                ).toFixed(1)}
+                %
               </div>
             </div>
-            
+
             <h3 className="asset-name-label">{asset.name}</h3>
-            
+
             <div className="value-display">
               <span className="value-label">Current Value</span>
-              <span className="value-amount">R {asset.currentValue.toLocaleString()}</span>
+              <span className="value-amount">
+                R {asset.currentValue.toLocaleString()}
+              </span>
             </div>
 
             <div className="meta-footer">
               <div className="meta-item">
                 <span className="meta-label">Basis</span>
-                <span className="meta-val">R {asset.purchasePrice.toLocaleString()}</span>
+                <span className="meta-val">
+                  R {asset.purchasePrice.toLocaleString()}
+                </span>
               </div>
               <div className="meta-item">
                 <span className="meta-label">Acquired</span>
-                <span className="meta-val">{new Date(asset.purchaseDate).toLocaleDateString()}</span>
+                <span className="meta-val">
+                  {new Date(asset.purchaseDate).toLocaleDateString()}
+                </span>
               </div>
             </div>
 
-            <button className="btn-ghost-sm" style={{ width: '100%', marginTop: 'auto' }}>View Ledger</button>
+            {asset.hasLoan && (
+              <div
+                className="loan-info-badge"
+                style={{
+                  padding: "0.75rem",
+                  background: "rgba(255,255,255,0.05)",
+                  borderRadius: "8px",
+                  marginTop: "0.5rem",
+                  fontSize: "0.75rem",
+                  color: "var(--color-text-secondary)",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "0.25rem",
+                  }}
+                >
+                  <span>Loan Balance:</span>
+                  <span style={{ color: "white", fontWeight: 600 }}>
+                    R {asset.loanBalance?.toLocaleString() || 0}
+                  </span>
+                </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Monthly:</span>
+                  <span style={{ color: "white", fontWeight: 600 }}>
+                    R {asset.monthlyPayment?.toLocaleString() || 0}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: "0.5rem", marginTop: "auto" }}>
+              <button
+                className="btn-ghost-sm"
+                style={{ flex: 1 }}
+                onClick={() => setEditingAsset(asset)}
+              >
+                Edit
+              </button>
+              <button className="btn-ghost-sm" style={{ flex: 1 }}>
+                View Ledger
+              </button>
+            </div>
           </div>
         ))}
         {assets.length === 0 && (
           <div className="empty-state">
-            < Landmark size={48} color="var(--color-text-muted)" style={{ opacity: 0.3 }} />
+            <Landmark
+              size={48}
+              color="var(--color-text-muted)"
+              style={{ opacity: 0.3 }}
+            />
             <p>No agricultural assets recorded in this household.</p>
           </div>
         )}
@@ -163,7 +288,9 @@ export default function AssetsView() {
           display: flex;
           flex-direction: column;
           gap: 1.25rem;
-          transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s;
+          transition:
+            transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+            border-color 0.2s;
           height: 100%;
           position: relative;
           overflow: hidden;
@@ -184,7 +311,7 @@ export default function AssetsView() {
           font-size: 0.65rem;
           font-weight: 800;
           text-transform: uppercase;
-          background: rgba(255,255,255,0.05);
+          background: rgba(255, 255, 255, 0.05);
           padding: 0.25rem 0.6rem;
           border-radius: 6px;
           color: var(--color-text-secondary);
@@ -229,7 +356,7 @@ export default function AssetsView() {
           grid-template-columns: 1fr 1fr;
           gap: 1rem;
           padding-top: 1rem;
-          border-top: 1px solid rgba(255,255,255,0.05);
+          border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .meta-item {

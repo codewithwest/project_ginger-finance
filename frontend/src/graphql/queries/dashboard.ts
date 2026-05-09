@@ -1,5 +1,5 @@
 export const GET_DASHBOARD_DATA = `
-  query GetDashboardData {
+  query GetDashboardData($month: Int, $year: Int) {
     me {
       _id
       username
@@ -11,6 +11,12 @@ export const GET_DASHBOARD_DATA = `
       category
       currentValue
       purchasePrice
+      purchaseDate
+      hasLoan
+      loanBalance
+      loanTerm
+      monthlyPayment
+      interestRate
     }
     mySavingsAccounts {
       _id
@@ -25,6 +31,12 @@ export const GET_DASHBOARD_DATA = `
       date
       description
       tags
+    }
+    monthlySummary(month: $month, year: $year) {
+      income
+      expenses
+      savings
+      balance
     }
   }
 `;
