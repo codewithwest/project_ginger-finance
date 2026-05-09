@@ -9,6 +9,7 @@ interface AddAssetModalProps {
   onClose: () => void;
   onSuccess: () => void;
   userId: string;
+  initialData?: any;
 }
 
 const CATEGORIES = ["Land", "Vehicle", "Livestock", "Equipment", "Other"];
@@ -17,18 +18,19 @@ export default function AddAssetModal({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }: Omit<AddAssetModalProps, "userId">) {
   const [formData, setFormData] = useState({
-    name: "",
-    category: "Land",
-    purchasePrice: "",
-    currentValue: "",
-    purchaseDate: new Date().toISOString().split("T")[0],
-    hasLoan: false,
-    loanBalance: "",
-    loanTerm: "",
-    monthlyPayment: "",
-    interestRate: "",
+    name: initialData?.name || "",
+    category: initialData?.category || "Land",
+    purchasePrice: initialData?.purchasePrice?.toString() || "",
+    currentValue: initialData?.currentValue?.toString() || "",
+    purchaseDate: initialData?.purchaseDate ? new Date(initialData.purchaseDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+    hasLoan: initialData?.hasLoan || false,
+    loanBalance: initialData?.loanBalance?.toString() || "",
+    loanTerm: initialData?.loanTerm?.toString() || "",
+    monthlyPayment: initialData?.monthlyPayment?.toString() || "",
+    interestRate: initialData?.interestRate?.toString() || "",
   });
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,20 +43,30 @@ export default function AddAssetModal({
     setLoading(true);
     setError("");
 
-    const mutation = `
-      mutation CreateAsset($input: CreateAssetInput!) {
-        createAsset(input: $input) {
-          _id
-          name
+    const mutation = initialData 
+      ? `
+        mutation UpdateAsset($input: UpdateAssetInput!) {
+          updateAsset(input: $input) {
+            _id
+            name
+          }
         }
-      }
-    `;
+      `
+      : `
+        mutation CreateAsset($input: CreateAssetInput!) {
+          createAsset(input: $input) {
+            _id
+            name
+          }
+        }
+      `;
 
     try {
       const result = await graphqlFetch({
         query: mutation,
         variables: {
           input: {
+            ...(initialData ? { id: initialData._id } : {}),
             name: formData.name,
             category: formData.category,
             purchasePrice: parseFloat(formData.purchasePrice),
