@@ -48,7 +48,7 @@ export default function TransactionsView() {
     setLoading(true);
     try {
       const query = `
-        query GetTransactionsData($type: String, $sort: String, $month: Int, $year: Int) {
+        query GetTransactionsData($type: String, $sort: String, $month: Float, $year: Float) {
           myTransactions(type: $type, sort: $sort, month: $month, year: $year) {
             _id
             description

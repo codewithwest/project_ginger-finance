@@ -25,7 +25,9 @@ export default function AddAssetModal({
     category: initialData?.category || "Land",
     purchasePrice: initialData?.purchasePrice?.toString() || "",
     currentValue: initialData?.currentValue?.toString() || "",
-    purchaseDate: initialData?.purchaseDate ? new Date(initialData.purchaseDate).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+    purchaseDate: initialData?.purchaseDate
+      ? new Date(initialData.purchaseDate).toISOString().split("T")[0]
+      : new Date().toISOString().split("T")[0],
     hasLoan: initialData?.hasLoan || false,
     loanBalance: initialData?.loanBalance?.toString() || "",
     loanTerm: initialData?.loanTerm?.toString() || "",
@@ -43,7 +45,7 @@ export default function AddAssetModal({
     setLoading(true);
     setError("");
 
-    const mutation = initialData 
+    const mutation = initialData
       ? `
         mutation UpdateAsset($input: UpdateAssetInput!) {
           updateAsset(input: $input) {
